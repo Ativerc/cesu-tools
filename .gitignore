@@ -1,0 +1,8 @@
+#credentials
+.envrc
+
+env/
+__pycache__/
+.vscode/
+data/
+ignore/
