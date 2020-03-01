@@ -3,6 +3,7 @@ import os
 from bs4 import BeautifulSoup as bs
 import pprint
 import json
+from collections import defaultdict
 
 consumer_account_no = os.environ['ACCOUNT']
 
@@ -34,22 +35,20 @@ welcome_url = "http://" + ip_addrs['portal1'] + urls['login_page']
 print(welcome_url)
 s = requests.Session()
 r = s.get(welcome_url)
-r = s.get("http://" + ip_addrs['portal1'] + urls["login_url"].replace("USERNAME", consumer_account_no).replace("LOLTCHA", "XVrTfz"))
+r = s.get("http://" + ip_addrs['portal1'] + urls["login_url"].replace("USERNAME", consumer_account_no).replace("LOLTCHA", "XVrTfz")) # SUBMIT button
 
-r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", "01-JAN-2020"))
+#TODO check the redirect above and see if redirected to `not_found_server.jsp` or to `loginindex.jsp`.
 
-
+#single request for 01-MMM-YYYY detailed_bill_format.jsp  
+focus_date = "01-MAY-2019"
+r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
 soup = bs(r.text, 'html.parser')
 
 
-
-# Rules
-# Skip first Tr
-# strip whitespace from top and 
-
-detailed_bill_dict = {}
+detailed_bill_dict = defaultdict(dict)
 
 def bill_dict_generator(soup):
+    detailed_bill_dict[focus_date] = {}
     for tableNo in [1,2,3,5]:                         #tableLoop
         table = soup.findAll('table')[tableNo]
         if tableNo == 1 or tableNo == 2 or tableNo == 5:
@@ -60,28 +59,28 @@ def bill_dict_generator(soup):
                     if trNo != 0 and tdNo % 2 == 0:
                         # print("Key: " + td.text.strip())
                         # detailed_bill_dict[tablename][key] = ""
-                        detailed_bill_dict[table.findAll('tr')[0].findAll('td')[0].text.strip()][td.text.strip()] = ""
+                        detailed_bill_dict[focus_date][table.findAll('tr')[0].findAll('td')[0].text.strip()][td.text.strip()] = ""
                     elif trNo == 0:
                         # print("\n\nTable No: " + str(tableNo) + "; Table Name: " + trow.findAll('td')[tdNo].text.strip())
                         # detailed_bill_dict[tablename] = {}
-                        detailed_bill_dict[trow.findAll('td')[tdNo].text.strip()] = {}
+                        detailed_bill_dict[focus_date][trow.findAll('td')[tdNo].text.strip()] = {}
                     elif trNo != 0 and tdNo % 2 != 0: 
                         # print("Value: " + td.text.strip())
                         # detailed_bill_dict[tablename][key] = "value"
-                        detailed_bill_dict[table.findAll('tr')[0].findAll('td')[0].text.strip()][table.findAll('tr')[trNo].findAll('td')[tdNo-1].text.strip()] = td.text.strip()
+                        detailed_bill_dict[focus_date][table.findAll('tr')[0].findAll('td')[0].text.strip()][table.findAll('tr')[trNo].findAll('td')[tdNo-1].text.strip()] = td.text.strip()
         elif tableNo == 3:
             for trNo in range(len(table.findAll('tr'))): #trLoop
                 trow = table.findAll('tr')[trNo]
                 if trNo == 0:
                     # print("\n\nTable No: " + str(tableNo) +"; Table Name: " + trow.findAll('td')[0].text.strip())
-                    detailed_bill_dict[table.findAll('tr')[0].findAll('td')[0].text.strip()] = {}
+                    detailed_bill_dict[focus_date][table.findAll('tr')[0].findAll('td')[0].text.strip()] = {}
                 if trNo != 0 and trNo % 2 != 0:
                     for tdNo in range(len(trow.findAll('td'))):
-                        key = table.findAll('tr')[trNo].findAll('td')[tdNo].text
+                        key = table.findAll('tr')[trNo].findAll('td')[tdNo].text.replace("\n", "").replace("\r", "")
                         value = table.findAll('tr')[trNo+1].findAll('td')[tdNo].text.strip()
                         key = key.strip() #.replace("\n", "")
                         # detailed_bill_dict[tablename][value] = key
-                        detailed_bill_dict[table.findAll('tr')[0].findAll('td')[0].text.strip()][key] = value
+                        detailed_bill_dict[focus_date][table.findAll('tr')[0].findAll('td')[0].text.strip()][key] = value
                          # print("Key: " + key)
                          # print("Value: " + value.strip())
 
@@ -92,7 +91,4 @@ pprint.pprint(detailed_bill_dict)
 with open("./data/bill_data.json", "w") as write_file:
     json.dump(detailed_bill_dict, write_file)
 
-# Bill Month body > div:nth-child(2) > center:nth-child(1) > table:nth-child(5) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1) > div:nth-child(1)
-# 01/2020 body > div:nth-child(2) > center:nth-child(1) > table:nth-child(5) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > span:nth-child(1) > b:nth-child(1) > font:nth-child(1)
 
-# 
