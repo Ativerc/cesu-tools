@@ -40,14 +40,26 @@ r = s.get("http://" + ip_addrs['portal1'] + urls["login_url"].replace("USERNAME"
 #TODO check the redirect above and see if redirected to `not_found_server.jsp` or to `loginindex.jsp`.
 
 #single request for 01-MMM-YYYY detailed_bill_format.jsp  
-focus_date = "01-MAY-2019"
-r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
-soup = bs(r.text, 'html.parser')
+date_list = ["01-MAY-2019"]
 
 
 detailed_bill_dict = defaultdict(dict)
 
-def bill_dict_generator(soup):
+def requester(date_list):
+    for focus_date in date_list:
+        r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
+        soup = bs(r.text, 'html.parser')
+        bill_dict_generator(soup, focus_date)
+
+def bill_dict_generator(soup, focus_date):
+    # Table 1 Consumer Information []
+    # Table 2 Meter Information []
+    # Table 3 Billing Information []
+    # Table 4 Adjustment Information []
+    # Table 5 Payment and Arrear Information 
+    # Table 6 Remarks (Not Scraped)
+
+    # Table 1, 2, 5 scraping format is equal
     detailed_bill_dict[focus_date] = {}
     for tableNo in [1,2,3,5]:                         #tableLoop
         table = soup.findAll('table')[tableNo]
@@ -56,36 +68,36 @@ def bill_dict_generator(soup):
                 trow = table.findAll('tr')[trNo]
                 for tdNo in range(len(trow.findAll('td'))):
                     td = trow.findAll('td')[tdNo]
-                    if trNo != 0 and tdNo % 2 == 0:
-                        # print("Key: " + td.text.strip())
-                        # detailed_bill_dict[tablename][key] = ""
+                    if trNo != 0 and tdNo % 2 == 0:  # Key td: row number != 0 and even td
+                        # detailed_bill_dict[focus_date][tablename][key] = ""
                         detailed_bill_dict[focus_date][table.findAll('tr')[0].findAll('td')[0].text.strip()][td.text.strip()] = ""
-                    elif trNo == 0:
-                        # print("\n\nTable No: " + str(tableNo) + "; Table Name: " + trow.findAll('td')[tdNo].text.strip())
-                        # detailed_bill_dict[tablename] = {}
+
+                    elif trNo == 0:                  # Tablename td: row number 0 containing the table name
+                        # detailed_bill_dict[focus_date][tablename] = {}
                         detailed_bill_dict[focus_date][trow.findAll('td')[tdNo].text.strip()] = {}
-                    elif trNo != 0 and tdNo % 2 != 0: 
-                        # print("Value: " + td.text.strip())
-                        # detailed_bill_dict[tablename][key] = "value"
+
+                    elif trNo != 0 and tdNo % 2 != 0: # Value td: row number != 0 and td is odd
+                        # detailed_bill_dict[focus_date][tablename][key] = value
                         detailed_bill_dict[focus_date][table.findAll('tr')[0].findAll('td')[0].text.strip()][table.findAll('tr')[trNo].findAll('td')[tdNo-1].text.strip()] = td.text.strip()
+                        
         elif tableNo == 3:
             for trNo in range(len(table.findAll('tr'))): #trLoop
                 trow = table.findAll('tr')[trNo]
-                if trNo == 0:
-                    # print("\n\nTable No: " + str(tableNo) +"; Table Name: " + trow.findAll('td')[0].text.strip())
+                if trNo == 0:                        # Tablename td: row number 0 containing the table name
+                    # print("\n\nTable No: " + str(tableNo) +"; Table Name: " + trow.findAll('td')[0].text.strip()) 
                     detailed_bill_dict[focus_date][table.findAll('tr')[0].findAll('td')[0].text.strip()] = {}
-                if trNo != 0 and trNo % 2 != 0:
+
+                if trNo != 0 and trNo % 2 != 0:      # row number != 0  and row number is odd; key td  = row_td; value_td = row+1_td
                     for tdNo in range(len(trow.findAll('td'))):
                         key = table.findAll('tr')[trNo].findAll('td')[tdNo].text.replace("\n", "").replace("\r", "")
                         value = table.findAll('tr')[trNo+1].findAll('td')[tdNo].text.strip()
                         key = key.strip() #.replace("\n", "")
-                        # detailed_bill_dict[tablename][value] = key
+                        # detailed_bill_dict[focus_date][tablename][value] = key
                         detailed_bill_dict[focus_date][table.findAll('tr')[0].findAll('td')[0].text.strip()][key] = value
-                         # print("Key: " + key)
-                         # print("Value: " + value.strip())
 
 
-bill_dict_generator(soup)
+
+requester(date_list)
 pprint.pprint(detailed_bill_dict)
 
 with open("./data/bill_data.json", "w") as write_file:
