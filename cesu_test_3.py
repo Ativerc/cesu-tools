@@ -66,12 +66,28 @@ previous_month_dt_object = date_tools.previous_month()
 def table_data_checker(request_data):
     # TODO
     soup = bs(request_data.text, 'html.parser')
+    data_checker_dict = {
+        "1": ["Consumer Information", "body > div:nth-child(2) > center:nth-child(1) > table:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > span:nth-child(1) > font:nth-child(1)"],
+        "2": ["Meter Information", "body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > span:nth-child(1) > font:nth-child(1)"],
+        "3": ["Billing Information", "body > div:nth-child(2) > center:nth-child(1) > table:nth-child(5) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > span:nth-child(1) > font:nth-child(1)"],
+        "4": ["Adjustment Information", "body > div:nth-child(2) > center:nth-child(1) > table:nth-child(7) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > span:nth-child(1) > font:nth-child(1)"],
+        "5": ["Payment & Arrear Information", "body > div:nth-child(2) > center:nth-child(1) > table:nth-child(9) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > span:nth-child(1) > font:nth-child(1)"]
+    }
+    count = 0
+    for i,j in data_checker_dict.items():
+        parsed_text = soup.findAll(j[1]).text
+        if j[0] == parsed_text:
+            count+=1
+            print(i + ": " +j[0] + " = " + parsed_text)
+        else:
+            return False
+    print("Found " + count + " of 5 table data.")
+    return True
     # get request bill data
     # make soup
     # check soup for all 5 table data (create dict with {'table no.': ["CSS Selector", "Data Supposed to be contained"]})
     # for each soup print the name of table found or not found
     # if all tables are found return True else return False
-    pass
     
 
 def first_bill_month_finder():
