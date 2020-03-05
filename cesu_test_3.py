@@ -71,16 +71,21 @@ def table_data_checker(request_data):
     # check soup for all 5 table data (create dict with {'table no.': ["CSS Selector", "Data Supposed to be contained"]})
     # for each soup print the name of table found or not found
     # if all tables are found return True else return False
+    pass
     
 
 def first_bill_month_finder():
     # TODO
-    install_month_dt_object = install_date_finder()
-    install_month_mmm_yyyy_string = date_tools.dt_object_to_mmm_yyyy(install_month_dt_object)
+    month_object = install_date_finder()
     sentinel = False
     while (sentinel == False):
-        r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", install_month_mmm_yyyy_string))
+        focus_date = date_tools.dt_object_to_mmm_yyyy(month_object)
+        r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
         sentinel = table_data_checker(r)
+        month_object = date_tools.next_month(month_object)
+    print(focus_date)
+    return date_tools.date_string_to_mmm_yyyy(focus_date, "DD-MMM-YYYY")
+        
         
     # get dt_object from install_date_finder()
     # replace dt_object by day=1

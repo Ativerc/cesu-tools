@@ -65,6 +65,10 @@ def dt_object_to_mmm_yyyy(dt_object):
     dt_object = dt_object.replace(day=1)
     return dt_object.strftime(dt_object, "%d-%b-%Y").upper()
 
+def next_month(dt_object):
+    dt_object = dt_object+relativedelta(months=+1)
+    return dt_object
+
 # def date_within_range(installation_month_date_string, previous_month_date_string, month_string):
 #     installation_dt_object = date_object(installation_month_date_string)
 #     previous_dt_object = date_object(previous_month_date_string)
