@@ -4,12 +4,23 @@ from bs4 import BeautifulSoup as bs
 import pprint
 import json
 from collections import defaultdict
+import argparse
+import configparser
+import date_tools
 
 consumer_account_no = os.environ['ACCOUNT']
 
 consumer_id = consumer_account_no[4:]
 division_code = consumer_account_no[:3]
 
+# Argument Parser
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--register', help="Register your User/Consumer ID.")
+
+# parser.add_argument('-r', '--range', help='A range of months between installation month and previous month(inclusive).')
+# parser.add_argument('-a', '--all-data', help='')
+# parser.add_argument('-m', '--month', help='A particular month')
 
 ip_addrs = {
     "portal1": "117.239.112.120:8070",
@@ -40,18 +51,55 @@ r = s.get("http://" + ip_addrs['portal1'] + urls["login_url"].replace("USERNAME"
 #TODO check the redirect above and see if redirected to `not_found_server.jsp` or to `loginindex.jsp`.
 
 #single request for 01-MMM-YYYY detailed_bill_format.jsp  
+
+
+def install_date_finder():
+    focus_date = date_tools.previous_month_string()
+    r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
+    soup = bs(r.text, 'html.parser')
+    installation_date_string = soup.findAll('body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(2) > td:nth-child(6) > div:nth-child(1) > b:nth-child(1) > font:nth-child(1).text')
+    ins_date_mmm_yyyy_string = date_tools.date_string_to_mmm_yyyy(installation_date_string) #
+    return ins_date_mmm_yyyy_string # TODO Change this so the function gives back a dt_object
+
+# installation_month
+previous_month_dt_object = date_tools.previous_month()
+
+def table_data_checker(request_data):
+    # TODO
+    # get request bill data
+    # make soup
+    # check soup for all 5 table data
+    # for each soup print the name of table found or not found
+    # if all tables are found return True else return False
+    pass
+
+def first_bill_finder():
+    # TODO
+    # get dt_object from install_date_finder()
+    # replace dt_object by day=1
+    # convert 1_dt_object to MMM-YYYY
+    # fetch data for that date
+    # send data to table_data_checker() for every subsequent month until you get True
+    # return a dt_object of the fill bill month
+    pass
+
+# date_list = range(first_bill_finder(), date_tools.previous_month())
+
 date_list = ["01-MAY-2019"]
+
+# TODO send first_bill_finder() and previousmonth() to a function to create a generator 
+    
 
 
 detailed_bill_dict = defaultdict(dict)
 
 def requester(date_list):
-    for focus_date in date_list:
+    for focus_date in date_list: # TODO Add a limiter; Download all data first , store it and then call bill_dict_generator() on the stored data
         r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
         soup = bs(r.text, 'html.parser')
         bill_dict_generator(soup, focus_date)
 
-def bill_dict_generator(soup, focus_date):
+def bill_dict_generator(soup, focus_date): # TODO This will fail or present erroneous data if blank data is received from Server. 
     # Table 1 Consumer Information []
     # Table 2 Meter Information []
     # Table 3 Billing Information []
