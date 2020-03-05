@@ -20,11 +20,11 @@ def previous_month():
 
 def current_month_string():
     # when called returns the previous month "MMM-YYYY" string
-    return datetime.strftime(current_month(), "%b-%Y").upper()
+    return datetime.strftime(current_month(), "%d-%b-%Y").upper()
 
 def previous_month_string():
     # when called returns the preious month string
-    return datetime.strftime(previous_month(), "%b-%Y").upper()
+    return datetime.strftime(previous_month(), "%d-%b-%Y").upper()
 
 
 def installation_date_parser(installation_date):
@@ -54,12 +54,16 @@ def date_string_to_mmm_yyyy(date_string, dt_string_format):
     # Returns: A "MMM-YYYY" string. Eg. "MAY-2019" "SEP-2020"
     dt_object = date_validator(date_string, dt_string_format)[1]
     dt_object = dt_object.replace(day=1)
-    return datetime.strftime(dt_object, "%b-%Y").upper()
+    return datetime.strftime(dt_object, "%d-%b-%Y").upper()
 
 def dt_string_to_dt_object(month_string, dt_string_format):
     dt_object = date_validator(month_string, dt_string_format)[1]
     dt_object = dt_object.replace(day=1)
     return dt_object 
+
+def dt_object_to_mmm_yyyy(dt_object):
+    dt_object = dt_object.replace(day=1)
+    return dt_object.strftime(dt_object, "%d-%b-%Y").upper()
 
 # def date_within_range(installation_month_date_string, previous_month_date_string, month_string):
 #     installation_dt_object = date_object(installation_month_date_string)
@@ -71,7 +75,7 @@ def month_range(start_dt_obj, end_dt_obj):
     # Argument: two datetime objects 
     # Function: Given two datetime objects this gives the list of months from start_dt_obj to end_dt_obj
     # Returns: Return a list of MMM-YYYY strings 
-    return [datetime.strftime(i, "%b-%Y").upper() for i in rrule(freq=MONTHLY, dtstart=start_dt_obj, until=end_dt_obj)]
+    return [datetime.strftime(i, "%d-%b-%Y").upper() for i in rrule(freq=MONTHLY, dtstart=start_dt_obj, until=end_dt_obj)]
 
 
 

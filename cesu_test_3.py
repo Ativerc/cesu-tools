@@ -65,22 +65,31 @@ previous_month_dt_object = date_tools.previous_month()
 
 def table_data_checker(request_data):
     # TODO
+    soup = bs(request_data.text, 'html.parser')
     # get request bill data
     # make soup
-    # check soup for all 5 table data
+    # check soup for all 5 table data (create dict with {'table no.': ["CSS Selector", "Data Supposed to be contained"]})
     # for each soup print the name of table found or not found
     # if all tables are found return True else return False
-    pass
+    
 
-def first_bill_finder():
+def first_bill_month_finder():
     # TODO
+    install_month_dt_object = install_date_finder()
+    install_month_mmm_yyyy_string = date_tools.dt_object_to_mmm_yyyy(install_month_dt_object)
+    sentinel = False
+    while (sentinel == False):
+        r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", install_month_mmm_yyyy_string))
+        sentinel = table_data_checker(r)
+        
     # get dt_object from install_date_finder()
     # replace dt_object by day=1
     # convert 1_dt_object to MMM-YYYY
-    # fetch data for that date
-    # send data to table_data_checker() for every subsequent month until you get True
+    # fetch data for that date (LOOP)
+    # send data to table_data_checker() for every subsequent month until you get True (LOOP)
+    # Once you hit True get the dt_object of the month that returned True
     # return a dt_object of the fill bill month
-    pass
+    pass 
 
 # date_list = date_tools.month_range(first_bill_finder(), date_tools.previous_month())
 
