@@ -33,28 +33,31 @@ def installation_date_parser(installation_date):
     pass
  
 
-def date_validator(month_string):
+def date_validator(date_string, dt_string_format):
     # Argument: month_string "MMM-YYYY"; Type: String
     # Function: get particular month "MMM-YYYY" string and check if valid; 
     # if string can be converted to a valid date object returns (True, dt_object of the month string and the original month string)
     # Returns: Tuple containing (Boolean, date object, string)
     try:
-        dt_object = parse(month_string) # TODO this will fail for "DD/MM/YYYY": parse("DD/MM/YYYY"), gives datetime.datetime(YYYY, DD, MM, 0, 0). This is wrong! Make sure to pass the date string as well as the format to remove semantic(DD MM interchanged) and runtime errors(the try/except will throw error when DD > MM's range).
+        if dt_string_format == "DD-MM-YYYY" or "DD/MM/YYYY":
+            dt_object = parse(date_string, dayfirst=True) # TODO Add more cases here as per the string format requirements
+        else:
+            raise ValueError
     except ValueError:                  # 
         print("You entered an invalid month or year!")
     else:
-        return (True, dt_object, month_string)
+        return (True, dt_object, date_string)
 
-def date_string_to_mmm_yyyy(month_string):
+def date_string_to_mmm_yyyy(date_string, dt_string_format):
     # Argument: Receives any datetime string "DD-MM-YYYY" "DD/MM/YYYY" etc.
     # Function: Converts the random date string to MMM-YYYY string
     # Returns: A "MMM-YYYY" string. Eg. "MAY-2019" "SEP-2020"
-    dt_object = date_validator(month_string)[1]
+    dt_object = date_validator(date_string, dt_string_format)[1]
     dt_object = dt_object.replace(day=1)
     return datetime.strftime(dt_object, "%b-%Y").upper()
 
-def string_to_dt_object(month_string):
-    dt_object = date_validator(month_string)[1]
+def string_to_dt_object(month_string, dt_string_format):
+    dt_object = date_validator(month_string, dt_string_format)[1]
     dt_object = dt_object.replace(day=1)
     return dt_object 
 
