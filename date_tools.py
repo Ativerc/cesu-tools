@@ -40,7 +40,7 @@ def date_validator(date_string, dt_string_format):
     # Returns: Tuple containing (Boolean, date object, string)
     try:
         if dt_string_format == "DD-MM-YYYY" or "DD/MM/YYYY":
-            dt_object = parse(date_string, dayfirst=True) # TODO Add more cases here as per the string format requirements
+            dt_object = parse(date_string, dayfirst=True) # Add more cases here as per the string format requirements
         else:
             raise ValueError
     except ValueError:                  # 
@@ -56,7 +56,7 @@ def date_string_to_mmm_yyyy(date_string, dt_string_format):
     dt_object = dt_object.replace(day=1)
     return datetime.strftime(dt_object, "%b-%Y").upper()
 
-def string_to_dt_object(month_string, dt_string_format):
+def dt_string_to_dt_object(month_string, dt_string_format):
     dt_object = date_validator(month_string, dt_string_format)[1]
     dt_object = dt_object.replace(day=1)
     return dt_object 
