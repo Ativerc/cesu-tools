@@ -7,6 +7,7 @@ from collections import defaultdict
 import argparse
 import configparser
 import date_tools
+import time
 
 consumer_account_no = os.environ['ACCOUNT']
 
@@ -101,8 +102,6 @@ def first_bill_month_finder():
         month_object = date_tools.next_month(month_object)
     print(focus_date)
     return date_tools.date_string_to_mmm_yyyy(focus_date, "DD-MMM-YYYY")
-        
-        
     # get dt_object from install_date_finder()
     # replace dt_object by day=1
     # convert 1_dt_object to MMM-YYYY
@@ -110,11 +109,10 @@ def first_bill_month_finder():
     # send data to table_data_checker() for every subsequent month until you get True (LOOP)
     # Once you hit True get the dt_object of the month that returned True
     # return a dt_object of the fill bill month
-    pass 
 
-# date_list = date_tools.month_range(first_bill_finder(), date_tools.previous_month())
+date_list = date_tools.month_range(first_bill_month_finder(), date_tools.previous_month())
 
-date_list = ["01-MAY-2019"]
+# date_list = ["01-MAY-2019"]
 
 # TODO send first_bill_finder() and previousmonth() to a function to create a generator 
     
@@ -122,11 +120,18 @@ date_list = ["01-MAY-2019"]
 
 detailed_bill_dict = defaultdict(dict)
 
+soup_list = []
 def requester(date_list):
-    for focus_date in date_list: # TODO Add a limiter; Download all data first , store it and then call bill_dict_generator() on the stored data
+    for focus_date in date_list:
+        time.sleep(5) # TODO Add a limiter; Download all data first , store it and then call bill_dict_generator() on the stored data
         r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
         soup = bs(r.text, 'html.parser')
-        bill_dict_generator(soup, focus_date)
+        soup_list.append(soup)
+
+focus_date_count = 0
+for soup in soup_list:
+    bill_dict_generator(soup, date_list[focus_date_count])
+    focus_date_count += 1
 
 def bill_dict_generator(soup, focus_date): # TODO This will fail or present erroneous data if blank data is received from Server. 
     # Table 1 Consumer Information []
