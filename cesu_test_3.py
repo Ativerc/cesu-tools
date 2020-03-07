@@ -55,11 +55,12 @@ r = s.get("http://" + ip_addrs['portal1'] + urls["login_url"].replace("USERNAME"
 
 
 def install_date_finder():
-    focus_date = date_tools.previous_month_string()
-    r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
-    soup = bs(r.text, 'html.parser')
-    installation_date_string = soup.findAll('body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(2) > td:nth-child(6) > div:nth-child(1) > b:nth-child(1) > font:nth-child(1).text')
-    return date_tools.dt_string_to_dt_object(installation_date_string, "DD/MM/YYYY")
+    focus_date = date_tools.previous_month_string() # TODO If the current month's bill hasn't been generated then the previous month bill won't be available on detailed_bill
+    r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date)) 
+    soup = bs(r.text, 'html.parser') # TODO This soup needs checking by table data checker; if data is not found then previous to previous month data needs to be fetched.
+    installation_date_string = soup.findAll('body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(2) > td:nth-child(6) > div:nth-child(1) > b:nth-child(1) > font:nth-child(1)')[0].text
+    installation_dt_object = date_tools.dt_string_to_dt_object(installation_date_string, "DD/MM/YYYY")
+    return installation_dt_object
 
 # installation_month
 previous_month_dt_object = date_tools.previous_month()
