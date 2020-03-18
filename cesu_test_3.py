@@ -55,10 +55,15 @@ r = s.get("http://" + ip_addrs['portal1'] + urls["login_url"].replace("USERNAME"
 
 
 def install_date_finder():
+    # Arguments: None
+    # Function: Returns the installation date of the meter as a dt_object from the bill_det page (Fetches the latest available bill_det page for this.)
+    # Returns: dt_object
     focus_date = date_tools.previous_month_string() # TODO If the current month's bill hasn't been generated then the previous month bill won't be available on detailed_bill
+    print("focus date in install_date_finder",focus_date)
     r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date)) 
     soup = bs(r.text, 'html.parser') # TODO This soup needs checking by table data checker; if data is not found then previous to previous month data needs to be fetched.
-    installation_date_string = soup.findAll('body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(2) > td:nth-child(6) > div:nth-child(1) > b:nth-child(1) > font:nth-child(1)')[0].text
+    installation_date_string = soup.select('body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(2) > td:nth-child(6) > div:nth-child(1) > b:nth-child(1) > font:nth-child(1)')[0].text.strip()
+    print("installation_date_sting in install_date_finder",installation_date_string)
     installation_dt_object = date_tools.dt_string_to_dt_object(installation_date_string, "DD/MM/YYYY")
     return installation_dt_object
 
@@ -73,36 +78,45 @@ def table_data_checker(request_data):
         "2": ["Meter Information", "body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > span:nth-child(1) > font:nth-child(1)"],
         "3": ["Billing Information", "body > div:nth-child(2) > center:nth-child(1) > table:nth-child(5) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > span:nth-child(1) > font:nth-child(1)"],
         "4": ["Adjustment Information", "body > div:nth-child(2) > center:nth-child(1) > table:nth-child(7) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > span:nth-child(1) > font:nth-child(1)"],
-        "5": ["Payment & Arrear Information", "body > div:nth-child(2) > center:nth-child(1) > table:nth-child(9) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > span:nth-child(1) > font:nth-child(1)"]
+        "5": ["Payment & Arrear  Information", "body > div:nth-child(2) > center:nth-child(1) > table:nth-child(9) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > span:nth-child(1) > font:nth-child(1)"]
     }
-    count = 0
+    elements = [i[0] for i in data_checker_dict.values()]
+    matched_elements = []
     for i,j in data_checker_dict.items():
-        parsed_text = soup.findAll(j[1]).text
-        if j[0] == parsed_text:
-            count+=1
-            print(i + ": " +j[0] + " = " + parsed_text)
-        else:
+        expected_text = data_checker_dict[i][0]
+        selected_element = soup.select(data_checker_dict[i][1])
+        if (len(selected_element) == 1) and (selected_element[0].text.strip() == expected_text):
+            print("expected_text: " + expected_text + str(len(expected_text)) + " received_text: " + selected_element[0].text.strip() + str(len(selected_element[0].text.strip())) )
+            matched_elements.append(selected_element[0].text.strip())
+        else: 
             return False
-    print("Found " + count + " of 5 table data.")
+    print(matched_elements)
     return True
-    # get request bill data
-    # make soup
-    # check soup for all 5 table data (create dict with {'table no.': ["CSS Selector", "Data Supposed to be contained"]})
-    # for each soup print the name of table found or not found
-    # if all tables are found return True else return False
     
 
 def first_bill_month_finder():
-    # TODO
-    month_object = install_date_finder()
+    # Arguments: None
+    # Function: Returns the dt_string DD-MMM-YYYY for the first bill.
+    # Returns: string 
+
+    month_object = install_date_finder()  #
+    print("month_object in first_bill_month_finder()",month_object)
     sentinel = False
     while (sentinel == False):
-        focus_date = date_tools.dt_object_to_mmm_yyyy(month_object)
-        r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
-        sentinel = table_data_checker(r)
-        month_object = date_tools.next_month(month_object)
-    print(focus_date)
-    return date_tools.date_string_to_mmm_yyyy(focus_date, "DD-MMM-YYYY")
+        focus_date = date_tools.dt_object_to_mmm_yyyy(month_object)# focus date = 01-MMM-YYYY(month_object)
+        url = "http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date) # url = .com/focus-date/userid/bill-det
+        print("Table Data Checker URL: ",url)
+        request_data = s.get(url)
+        sentinel = table_data_checker(request_data)
+        if sentinel == True:
+            print("sentinel value in while loop if con sentinel == True: ", sentinel)
+            break
+        elif sentinel == False:
+            print("sentinel value in while loop if con sentinel ==False:", sentinel)
+            month_object = date_tools.next_month(month_object)
+
+    print(f"month_object: {month_object} focus_date: {focus_date}")
+    return month_object
     # get dt_object from install_date_finder()
     # replace dt_object by day=1
     # convert 1_dt_object to MMM-YYYY
@@ -112,6 +126,7 @@ def first_bill_month_finder():
     # return a dt_object of the fill bill month
 
 date_list = date_tools.month_range(first_bill_month_finder(), date_tools.previous_month())
+print(date_list)
 
 # date_list = ["01-MAY-2019"]
 
@@ -128,11 +143,9 @@ def requester(date_list):
         r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
         soup = bs(r.text, 'html.parser')
         soup_list.append(soup)
+        print(f"requester's focus_date: {focus_date}")
 
-focus_date_count = 0
-for soup in soup_list:
-    bill_dict_generator(soup, date_list[focus_date_count])
-    focus_date_count += 1
+
 
 def bill_dict_generator(soup, focus_date): # TODO This will fail or present erroneous data if blank data is received from Server. 
     # Table 1 Consumer Information []
@@ -181,6 +194,10 @@ def bill_dict_generator(soup, focus_date): # TODO This will fail or present erro
 
 
 requester(date_list)
+focus_date_count = 0
+for soup in soup_list:
+    bill_dict_generator(soup, date_list[focus_date_count])
+    focus_date_count += 1
 pprint.pprint(detailed_bill_dict)
 
 with open("./data/bill_data.json", "w") as write_file:

@@ -63,7 +63,7 @@ def dt_string_to_dt_object(month_string, dt_string_format):
 
 def dt_object_to_mmm_yyyy(dt_object):
     dt_object = dt_object.replace(day=1)
-    return dt_object.strftime(dt_object, "%d-%b-%Y").upper()
+    return datetime.strftime(dt_object, "%d-%b-%Y").upper()
 
 def next_month(dt_object):
     dt_object = dt_object+relativedelta(months=+1)
@@ -79,7 +79,10 @@ def month_range(start_dt_obj, end_dt_obj):
     # Argument: two datetime objects 
     # Function: Given two datetime objects this gives the list of months from start_dt_obj to end_dt_obj
     # Returns: Return a list of MMM-YYYY strings 
-    return [datetime.strftime(i, "%d-%b-%Y").upper() for i in rrule(freq=MONTHLY, dtstart=start_dt_obj, until=end_dt_obj)]
+    print("start_dt_obj_type", type(start_dt_obj))
+    print("end_dt_object_type", type(end_dt_obj))
+    rrule_obj = rrule(freq=MONTHLY, dtstart=start_dt_obj, until=end_dt_obj)
+    return [datetime.strftime(i, "%d-%b-%Y").upper() for i in rrule_obj]
 
 
 
