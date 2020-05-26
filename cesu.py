@@ -10,7 +10,6 @@ from constants import (CESU_CONSUMER_PORTAL_1,
                         SBM_BILL_URL)
 
 consumer_account_no = os.environ['ACCOUNT']
-
 consumer_id = consumer_account_no[4:]
 division_code = consumer_account_no[:3]
 
@@ -31,7 +30,6 @@ def url_maker():
 
 # Argument Parser
 parser = argparse.ArgumentParser()
-
 parser.add_argument('--register', help="Register your User/Consumer ID.")
 parser.add_argument('-r', '--range', help='A range of months between installation month and previous month(inclusive).')
 parser.add_argument('-a', '--all-data', help='')
