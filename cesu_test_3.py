@@ -1,40 +1,42 @@
-import requests
-import os
+import requests, os, argparse, configparser, date_tools, json, pprint, time
 from bs4 import BeautifulSoup as bs
-import pprint
-import json
 from collections import defaultdict
-import argparse
-import configparser
-import date_tools
-import time
+from constants import (CESU_CONSUMER_PORTAL_1, 
+                        CESU_CONSUMER_PORTAL_2,
+                        LOGIN_PAGE,
+                        LOGIN_URL,
+                        BILL_DETAILS,
+                        DETAILED_BILL_URL,
+                        SBM_BILL_URL)
 
 consumer_account_no = os.environ['ACCOUNT']
 
 consumer_id = consumer_account_no[4:]
 division_code = consumer_account_no[:3]
 
+def basic_config_creator(account):
+    config = configparser.ConfigParser()
+    config['BASIC']['CESU Consumer Account No.'] = account
+    with open('cesu.ini', 'w') as configfile: #constants.CONFIG_FILEPATH
+        config.write(configfile)
+
+
+def scraper(url):
+    pass
+
+def url_maker(): 
+    pass
+
+
+
 # Argument Parser
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--register', help="Register your User/Consumer ID.")
+parser.add_argument('-r', '--range', help='A range of months between installation month and previous month(inclusive).')
+parser.add_argument('-a', '--all-data', help='')
+parser.add_argument('-m', '--month', help='A particular month')
 
-# parser.add_argument('-r', '--range', help='A range of months between installation month and previous month(inclusive).')
-# parser.add_argument('-a', '--all-data', help='')
-# parser.add_argument('-m', '--month', help='A particular month')
-
-ip_addrs = {
-    "portal1": "117.239.112.120:8070",
-    "portal2": "203.193.144.25:8080"
-}
-
-urls = {
-    "login_page": "/ConsumerPortal/welcome.jsp", # /ConsumerPortal/welcome.jsp?link=IP_ADDR
-    "login_url": "/ConsumerPortal/Record_Check?strConsID=USERNAME&OptType=Login&strDivCode=0&strConsumerType=0&strConsNo=&txtInput=LOLTCHA&image2.x=73&image2.y=14",
-    "bill_details": "/ConsumerPortal/bill_s4.jsp",
-    "detailed_bill_format": "/ConsumerPortal/bill_det.jsp?DIVCODE=DC&CONS_ACC=USERNAME&CESU_DATE=DD-MM-YYYY",
-    "sbm_bill_format": "/ConsumerPortal/SBM_Bill_Format.jsp?DIVCODE=DC&CONS_ACC=USERNAME&CESU_DATE=DD-MM-YYYY"    
-}
 
 # Need an URL gen function?
 
@@ -43,11 +45,11 @@ urls = {
 # captcha/loltcha generator function
 # def loltcha_gen():
 #     pass
-welcome_url = "http://" + ip_addrs['portal1'] + urls['login_page']
+welcome_url = "http://" + CESU_CONSUMER_PORTAL_1 + LOGIN_PAGE
 print(welcome_url)
 s = requests.Session()
 r = s.get(welcome_url)
-r = s.get("http://" + ip_addrs['portal1'] + urls["login_url"].replace("USERNAME", consumer_account_no).replace("LOLTCHA", "XVrTfz")) # SUBMIT button
+r = s.get("http://" + CESU_CONSUMER_PORTAL_1 + LOGIN_URL.replace("USERNAME", consumer_account_no).replace("LOLTCHA", "XVrTfz")) # SUBMIT button
 
 #TODO check the redirect above and see if redirected to `not_found_server.jsp` or to `loginindex.jsp`.
 
@@ -60,7 +62,7 @@ def install_date_finder():
     # Returns: dt_object
     focus_date = date_tools.previous_month_string() # TODO If the current month's bill hasn't been generated then the previous month bill won't be available on detailed_bill
     print("focus date in install_date_finder",focus_date)
-    r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date)) 
+    r = s.get("http://" + CESU_CONSUMER_PORTAL_1 + DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date)) 
     soup = bs(r.text, 'html.parser') # TODO This soup needs checking by table data checker; if data is not found then previous to previous month data needs to be fetched.
     installation_date_string = soup.select('body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(2) > td:nth-child(6) > div:nth-child(1) > b:nth-child(1) > font:nth-child(1)')[0].text.strip()
     print("installation_date_sting in install_date_finder",installation_date_string)
@@ -86,7 +88,7 @@ def table_data_checker(request_data):
         expected_text = data_checker_dict[i][0]
         selected_element = soup.select(data_checker_dict[i][1])
         if (len(selected_element) == 1) and (selected_element[0].text.strip() == expected_text):
-            print("expected_text: " + expected_text + str(len(expected_text)) + " received_text: " + selected_element[0].text.strip() + str(len(selected_element[0].text.strip())) )
+            print("expected_text: " + expected_text + " Len[" + str(len(expected_text)) + "] " + " received_text: " + selected_element[0].text.strip() +  " Len[" + str(len(selected_element[0].text.strip())) + "]" )
             matched_elements.append(selected_element[0].text.strip())
         else: 
             return False
@@ -104,7 +106,7 @@ def first_bill_month_finder():
     sentinel = False
     while (sentinel == False):
         focus_date = date_tools.dt_object_to_mmm_yyyy(month_object)# focus date = 01-MMM-YYYY(month_object)
-        url = "http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date) # url = .com/focus-date/userid/bill-det
+        url = "http://" + CESU_CONSUMER_PORTAL_1 + DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date) # url = .com/focus-date/userid/bill-det
         print("Table Data Checker URL: ",url)
         request_data = s.get(url)
         sentinel = table_data_checker(request_data)
@@ -125,8 +127,6 @@ def first_bill_month_finder():
     # Once you hit True get the dt_object of the month that returned True
     # return a dt_object of the fill bill month
 
-date_list = date_tools.month_range(first_bill_month_finder(), date_tools.previous_month())
-print(date_list)
 
 # date_list = ["01-MAY-2019"]
 
@@ -140,10 +140,11 @@ soup_list = []
 def requester(date_list):
     for focus_date in date_list:
         time.sleep(5) # TODO Add a limiter; Download all data first , store it and then call bill_dict_generator() on the stored data
-        r = s.get("http://" + ip_addrs['portal1'] + urls['detailed_bill_format'].replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
+        r = s.get("http://" + CESU_CONSUMER_PORTAL_1 + DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
         soup = bs(r.text, 'html.parser')
         soup_list.append(soup)
         print(f"requester's focus_date: {focus_date}")
+
 
 
 
@@ -192,6 +193,8 @@ def bill_dict_generator(soup, focus_date): # TODO This will fail or present erro
                         detailed_bill_dict[focus_date][table.findAll('tr')[0].findAll('td')[0].text.strip()][key] = value
 
 
+date_list = date_tools.month_range(first_bill_month_finder(), date_tools.previous_month())
+print(date_list)
 
 requester(date_list)
 focus_date_count = 0
