@@ -1,4 +1,4 @@
-import requests, os, argparse, configparser, date_tools, json, pprint, time
+import requests, os, argparse, configparser, date_tools, json, pprint, time, string, random
 from bs4 import BeautifulSoup as bs
 from collections import defaultdict
 from constants import (CESU_CONSUMER_PORTAL_1, 
@@ -41,13 +41,20 @@ parser.add_argument('-m', '--month', help='A particular month')
 # Check which ip_addrs is up
 
 # captcha/loltcha generator function
-# def loltcha_gen():
-#     pass
+def old_loltcha_gen():
+    letters = string.ascii_uppercase + string.ascii_lowercase
+    old_loltcha = ''
+    for i in range(6):
+        old_loltcha += random.choice(letters)
+    return old_loltcha
+
+
 welcome_url = "http://" + CESU_CONSUMER_PORTAL_1 + LOGIN_PAGE
 print(welcome_url)
 s = requests.Session()
 r = s.get(welcome_url)
-r = s.get("http://" + CESU_CONSUMER_PORTAL_1 + LOGIN_URL.replace("USERNAME", consumer_account_no).replace("LOLTCHA", "XVrTfz")) # SUBMIT button
+loltcha = old_loltcha_gen()
+r = s.get("http://" + CESU_CONSUMER_PORTAL_1 + LOGIN_URL.replace("USERNAME", consumer_account_no).replace("LOLTCHA", loltcha)) # SUBMIT button
 
 #TODO check the redirect above and see if redirected to `not_found_server.jsp` or to `loginindex.jsp`.
 
@@ -97,8 +104,7 @@ def table_data_checker(request_data):
 def first_bill_month_finder():
     # Arguments: None
     # Function: Returns the dt_string DD-MMM-YYYY for the first bill.
-    # Returns: string 
-
+    # Returns: dt_object
     month_object = install_date_finder()  #
     print("month_object in first_bill_month_finder()",month_object)
     sentinel = False
@@ -114,28 +120,14 @@ def first_bill_month_finder():
         elif sentinel == False:
             print("sentinel value in while loop if con sentinel ==False:", sentinel)
             month_object = date_tools.next_month(month_object)
-
     print(f"month_object: {month_object} focus_date: {focus_date}")
     return month_object
-    # get dt_object from install_date_finder()
-    # replace dt_object by day=1
-    # convert 1_dt_object to MMM-YYYY
-    # fetch data for that date (LOOP)
-    # send data to table_data_checker() for every subsequent month until you get True (LOOP)
-    # Once you hit True get the dt_object of the month that returned True
-    # return a dt_object of the fill bill month
 
-
-# date_list = ["01-MAY-2019"]
 
 # TODO send first_bill_finder() and previousmonth() to a function to create a generator 
-    
 
-
-detailed_bill_dict = defaultdict(dict)
-
-soup_list = []
-def requester(date_list):
+def detailed_bill_requester(date_list):
+    soup_list = []
     for focus_date in date_list:
         time.sleep(5) # TODO Add a limiter; Download all data first , store it and then call bill_dict_generator() on the stored data
         r = s.get("http://" + CESU_CONSUMER_PORTAL_1 + DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
@@ -145,8 +137,8 @@ def requester(date_list):
 
 
 
-
-def bill_dict_generator(soup, focus_date): # TODO This will fail or present erroneous data if blank data is received from Server. 
+detailed_bill_dict = defaultdict(dict)
+def detailed_bill_dict_generator(soup, focus_date): # TODO This will fail or present erroneous data if blank data is received from Server. 
     # Table 1 Consumer Information []
     # Table 2 Meter Information []
     # Table 3 Billing Information []
@@ -191,13 +183,15 @@ def bill_dict_generator(soup, focus_date): # TODO This will fail or present erro
                         detailed_bill_dict[focus_date][table.findAll('tr')[0].findAll('td')[0].text.strip()][key] = value
 
 
-date_list = date_tools.month_range(first_bill_month_finder(), date_tools.previous_month())
+first_bill_month = first_bill_month_finder()
+previous_month = date_tools.previous_month()
+date_list = date_tools.month_range(first_bill_month, previous_month)
 print(date_list)
 
-requester(date_list)
+detailed_bill_soup_list = detailed_bill_requester(date_list)
 focus_date_count = 0
-for soup in soup_list:
-    bill_dict_generator(soup, date_list[focus_date_count])
+for soup in detailed_bill_soup_list:
+    detailed_bill_dict_generator(soup, date_list[focus_date_count])
     focus_date_count += 1
 pprint.pprint(detailed_bill_dict)
 
