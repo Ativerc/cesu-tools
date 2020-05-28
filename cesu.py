@@ -74,11 +74,15 @@ def install_date_finder():
     installation_dt_object = date_tools.dt_string_to_dt_object(installation_date_string, "DD/MM/YYYY")
     return installation_dt_object
 
-# installation_month
-previous_month_dt_object = date_tools.previous_month()
 
 def table_data_checker(request_data):
-    # TODO
+    # The reason this function exists is because sometimes I get an empty or half populated detailed bill page due to server-side errors. 
+    # This happens rarely but can be a headscratcher. This is something quick that I wrote. There's probably a better way to do this.
+    # Arguments: request_data [beautifulsoup soup]
+    # Function: Checks the first 'td' each table in detailed bill to check if the string within it matches a predefined string.
+    # Returns: True when all td strings match the predefined string, else returns False.
+    # :TODO: This is currently set up so that it prints every time. But I will make it so that it outputs only when verbose mode is
+    # activated or an Error occurs.
     soup = bs(request_data.text, 'html.parser')
     data_checker_dict = {
         "1": ["Consumer Information", "body > div:nth-child(2) > center:nth-child(1) > table:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > span:nth-child(1) > font:nth-child(1)"],
@@ -96,15 +100,19 @@ def table_data_checker(request_data):
             print("expected_text: " + expected_text + " Len[" + str(len(expected_text)) + "] " + " received_text: " + selected_element[0].text.strip() +  " Len[" + str(len(selected_element[0].text.strip())) + "]" )
             matched_elements.append(selected_element[0].text.strip())
         else: 
+            print(f"Expected: {expected_text}. Not found!")
             return False
     print(matched_elements)
     return True
     
 
 def first_bill_month_finder():
+    # The reason this function exists is because the installation date of the meter can preceed the first bill generated, by almost 2-3 months.
+    # Hitting the endpoint for the 2-3 months in between will return empty detailed bill pages.
     # Arguments: None
     # Function: Returns the dt_string DD-MMM-YYYY for the first bill.
-    # Returns: dt_object
+    # Returns: dt_object for the first bill month
+    # This prints all the time. Make it print on verbosity ON or Error
     month_object = install_date_finder()  #
     print("month_object in first_bill_month_finder()",month_object)
     sentinel = False
@@ -127,13 +135,18 @@ def first_bill_month_finder():
 # TODO send first_bill_finder() and previousmonth() to a function to create a generator 
 
 def detailed_bill_requester(date_list):
+    # Arguments: date_list [list of MMM-YYYY date_strings]
+    # Function: Given the date_list this will request detailed bill for each month in that list and store the corresponding soups in soup_list
+    # and return the soup_list
+    # Returns:  soup_list [List of bs4 soups of detailed_bill for each MMM-YYYY in date_list]
     soup_list = []
     for focus_date in date_list:
-        time.sleep(5) # TODO Add a limiter; Download all data first , store it and then call bill_dict_generator() on the stored data
+        time.sleep(5) 
         r = s.get("http://" + CESU_CONSUMER_PORTAL_1 + DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
         soup = bs(r.text, 'html.parser')
         soup_list.append(soup)
         print(f"requester's focus_date: {focus_date}")
+    return soup_list
 
 
 
@@ -182,20 +195,18 @@ def detailed_bill_dict_generator(soup, focus_date): # TODO This will fail or pre
                         # detailed_bill_dict[focus_date][tablename][value] = key
                         detailed_bill_dict[focus_date][table.findAll('tr')[0].findAll('td')[0].text.strip()][key] = value
 
-
-first_bill_month = first_bill_month_finder()
-previous_month = date_tools.previous_month()
-date_list = date_tools.month_range(first_bill_month, previous_month)
-print(date_list)
-
-detailed_bill_soup_list = detailed_bill_requester(date_list)
-focus_date_count = 0
-for soup in detailed_bill_soup_list:
-    detailed_bill_dict_generator(soup, date_list[focus_date_count])
-    focus_date_count += 1
-pprint.pprint(detailed_bill_dict)
-
-with open("./data/bill_data.json", "w") as write_file:
-    json.dump(detailed_bill_dict, write_file)
+def all_detailed_bill_data_json():
+    first_bill_month = first_bill_month_finder()
+    previous_month = date_tools.previous_month()
+    date_list = date_tools.mmm_yyyy_month_range(first_bill_month, previous_month)
+    print(date_list)
+    detailed_bill_soup_list = detailed_bill_requester(date_list)
+    focus_date_count = 0
+    for soup in detailed_bill_soup_list:
+        detailed_bill_dict_generator(soup, date_list[focus_date_count])
+        focus_date_count += 1
+    pprint.pprint(detailed_bill_dict)
+    with open("./data/bill_data.json", "w") as write_file:
+        json.dump(detailed_bill_dict, write_file)
 
 

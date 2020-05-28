@@ -75,7 +75,7 @@ def next_month(dt_object):
 #     month_string = date_object(month_string)
 #     # if installation dt_object < 
 
-def month_range(start_dt_obj, end_dt_obj):
+def mmm_yyyy_month_range(start_dt_obj, end_dt_obj):
     # Argument: two datetime objects 
     # Function: Given two datetime objects this gives the list of months from start_dt_obj to end_dt_obj
     # Returns: Return a list of MMM-YYYY strings 
