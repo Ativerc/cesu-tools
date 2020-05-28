@@ -5,9 +5,10 @@ from constants import (CESU_CONSUMER_PORTAL_1,
                         CESU_CONSUMER_PORTAL_2,
                         LOGIN_PAGE,
                         LOGIN_URL,
-                        BILL_DETAILS,
+                        BILLS_PAGE_URL,
                         DETAILED_BILL_URL,
-                        SBM_BILL_URL)
+                        SBM_BILL_URL, 
+                        SBM_BILLS_DIRPATH)
 
 consumer_account_no = os.environ['ACCOUNT']
 consumer_id = consumer_account_no[4:]
@@ -17,7 +18,7 @@ def basic_config_creator(account):
     config = configparser.ConfigParser()
     config['BASIC']['CESU Consumer Account No.'] = account
     with open('cesu.ini', 'w') as configfile: #constants.CONFIG_FILEPATH
-        config.write(configfile)
+        configfile.write(configfile)
 
 
 def scraper(url):
@@ -52,7 +53,10 @@ def old_loltcha_gen():
 welcome_url = "http://" + CESU_CONSUMER_PORTAL_1 + LOGIN_PAGE
 print(welcome_url)
 s = requests.Session()
-r = s.get(welcome_url)
+try:
+    r = s.get(welcome_url)
+except:
+    print("Some Error Occured!")
 loltcha = old_loltcha_gen()
 r = s.get("http://" + CESU_CONSUMER_PORTAL_1 + LOGIN_URL.replace("USERNAME", consumer_account_no).replace("LOLTCHA", loltcha)) # SUBMIT button
 
@@ -210,3 +214,47 @@ def all_detailed_bill_data_json():
         json.dump(detailed_bill_dict, write_file)
 
 
+def check_latest_sbm_bill_present(verbosity=False):
+    #check bills page if latestbill element exists
+        # count the number of tr in the last table of the page.
+            # if the count == 18 then 15,16,17 tr are important 
+                    # 15 - Bill Details for Current/Latest Month(s) ; 
+                    # 16 - Row of theads Bill Month - Bill Date; Current Reading; Unit bill; Energy Charge; Electricity Duty; Meter Rent; Fix Charge; Current Total; Rebate Amt; Rebate Date; Amount Paid; Collection Date
+                    # 17 - Link to bill and data
+                # Match 17's first column's MMM-YYYY string to current month's MMM-YYYY
+            # 
+    # fetch sbm details for that MMM-YYYY month
+        # have to get the html
+        # have to get the data as a json as well.
+        # get the screenshot. needed for TG bot and quick share
+    bills_page = "http://" + CESU_CONSUMER_PORTAL_1 + BILLS_PAGE_URL
+    r = s.get(bills_page)
+    soup = bs(r.text, "html.parser")
+    last_tables_trs = len(soup.select("body > table:nth-child(4) > tr"))
+    bill_gen_month_name = soup.select("body > table:nth-child(4) > tr:nth-child(17) > td:nth-child(1) > div > a")[0].text.strip()
+    print(bill_gen_month_name)
+    current_month_mmm_yyyy_string = date_tools.current_month_string()
+    print(current_month_mmm_yyyy_string)
+    if last_tables_trs == 18 and (bill_gen_month_name == current_month_mmm_yyyy_string):
+        print(f"No. of 'tr's contained in the last table of bills page: Expected: 18; Received: {last_tables_trs}\n" +
+        f"Current Month: {current_month_mmm_yyyy_string} SBM Bill Generated for Month: {bill_gen_month_name}" )
+        return True
+    elif last_tables_trs == 18 and (bill_gen_month_name != current_month_mmm_yyyy_string) :
+        print(f"SBM Bill not available for current {current_month_mmm_yyyy_string} month.")
+        return False
+
+
+def get_latest_sbm_bill():
+    sbm_bill_current_month = check_latest_sbm_bill_present()
+    current_month_mmm_yyyy_string = date_tools.current_month_string()
+    if os.path.isdir(SBM_BILLS_DIRPATH) == False:
+        os.makedirs(SBM_BILLS_DIRPATH)
+    if sbm_bill_current_month == True:
+        sbm_bill_html = s.get("http://" + CESU_CONSUMER_PORTAL_1 + SBM_BILL_URL.replace("DC", division_code).replace("USERNAME", consumer_id).replace("DD-MMM-YYYY", "01"+current_month_mmm_yyyy_string))
+        print(f"Saving to {SBM_BILLS_DIRPATH}/{current_month_mmm_yyyy_string}.html")
+        with open(SBM_BILLS_DIRPATH + f"{current_month_mmm_yyyy_string}.html", "w") as html_file:
+            html_file.write(sbm_bill_html.text)
+    
+            
+
+get_latest_sbm_bill()

@@ -5,6 +5,7 @@ env/
 __pycache__/
 .vscode/
 data/
+bills/
 ignore/
 dategen.py
 *.pyc

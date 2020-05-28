@@ -19,8 +19,8 @@ def previous_month():
     return previous_month_dt_object
 
 def current_month_string():
-    # when called returns the previous month "MMM-YYYY" string
-    return datetime.strftime(current_month(), "%d-%b-%Y").upper()
+    # when called returns the current month "MMM-YYYY" string
+    return datetime.strftime(current_month(), "%b-%Y").upper()
 
 def previous_month_string():
     # when called returns the preious month string
