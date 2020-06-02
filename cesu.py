@@ -1,9 +1,8 @@
-import requests, os, argparse, configparser, date_tools, json, pprint, time, string, random
+import requests, os, argparse, configparser, json, pprint, time, string, random, sys
 from bs4 import BeautifulSoup as bs
 from collections import defaultdict
-from constants import (CESU_CONSUMER_PORTAL_1, 
-                        CESU_CONSUMER_PORTAL_2,
-                        LOGIN_PAGE,
+import date_tools
+from constants import (LOGIN_PAGE_URL,
                         LOGIN_URL,
                         BILLS_PAGE_URL,
                         DETAILED_BILL_URL,
@@ -50,15 +49,26 @@ def old_loltcha_gen():
     return old_loltcha
 
 
-welcome_url = "http://" + CESU_CONSUMER_PORTAL_1 + LOGIN_PAGE
-print(welcome_url)
+loginparams = {
+    'strConsID': consumer_account_no,
+    'OptType': 'Login',
+    'strDivCode': '0',
+    'strConsumerType': '0',
+    'strConsNo': '',
+    'txtInput': old_loltcha_gen(),
+    'image2.x': '45',
+    'image2.y': '11',
+}
+
 s = requests.Session()
 try:
-    r = s.get(welcome_url)
-except:
-    print("Some Error Occured!")
-loltcha = old_loltcha_gen()
-r = s.get("http://" + CESU_CONSUMER_PORTAL_1 + LOGIN_URL.replace("USERNAME", consumer_account_no).replace("LOLTCHA", loltcha)) # SUBMIT button
+    r = s.get(LOGIN_PAGE_URL)
+    r = s.get(LOGIN_URL, params=loginparams, cookies=s.cookies, headers=s.headers) # SUBMIT button
+    print(r.status_code)
+except requests.RequestException as exception:
+    print("Network Error Occured!")
+    print(exception)
+    sys.exit(1)
 
 #TODO check the redirect above and see if redirected to `not_found_server.jsp` or to `loginindex.jsp`.
 
@@ -71,7 +81,7 @@ def install_date_finder():
     # Returns: dt_object
     focus_date = date_tools.previous_month_string() # TODO If the current month's bill hasn't been generated then the previous month bill won't be available on detailed_bill
     print("focus date in install_date_finder",focus_date)
-    r = s.get("http://" + CESU_CONSUMER_PORTAL_1 + DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date)) 
+    r = s.get(DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date)) 
     soup = bs(r.text, 'html.parser') # TODO This soup needs checking by table data checker; if data is not found then previous to previous month data needs to be fetched.
     installation_date_string = soup.select('body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(2) > td:nth-child(6) > div:nth-child(1) > b:nth-child(1) > font:nth-child(1)')[0].text.strip()
     print("installation_date_sting in install_date_finder",installation_date_string)
@@ -122,7 +132,7 @@ def first_bill_month_finder():
     sentinel = False
     while (sentinel == False):
         focus_date = date_tools.dt_object_to_mmm_yyyy(month_object)# focus date = 01-MMM-YYYY(month_object)
-        url = "http://" + CESU_CONSUMER_PORTAL_1 + DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date) # url = .com/focus-date/userid/bill-det
+        url = DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date) # url = .com/focus-date/userid/bill-det
         print("Table Data Checker URL: ",url)
         request_data = s.get(url)
         sentinel = table_data_checker(request_data)
@@ -146,7 +156,7 @@ def detailed_bill_requester(date_list):
     soup_list = []
     for focus_date in date_list:
         time.sleep(5) 
-        r = s.get("http://" + CESU_CONSUMER_PORTAL_1 + DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
+        r = s.get(DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
         soup = bs(r.text, 'html.parser')
         soup_list.append(soup)
         print(f"requester's focus_date: {focus_date}")
@@ -227,34 +237,94 @@ def check_latest_sbm_bill_present(verbosity=False):
         # have to get the html
         # have to get the data as a json as well.
         # get the screenshot. needed for TG bot and quick share
-    bills_page = "http://" + CESU_CONSUMER_PORTAL_1 + BILLS_PAGE_URL
-    r = s.get(bills_page)
+    r = s.get(BILLS_PAGE_URL)
     soup = bs(r.text, "html.parser")
     last_tables_trs = len(soup.select("body > table:nth-child(4) > tr"))
     bill_gen_month_name = soup.select("body > table:nth-child(4) > tr:nth-child(17) > td:nth-child(1) > div > a")[0].text.strip()
     print(bill_gen_month_name)
     current_month_mmm_yyyy_string = date_tools.current_month_string()
+    previous_month_mmm_yyyy_string = date_tools.previous_month_string()
     print(current_month_mmm_yyyy_string)
-    if last_tables_trs == 18 and (bill_gen_month_name == current_month_mmm_yyyy_string):
-        print(f"No. of 'tr's contained in the last table of bills page: Expected: 18; Received: {last_tables_trs}\n" +
-        f"Current Month: {current_month_mmm_yyyy_string} SBM Bill Generated for Month: {bill_gen_month_name}" )
-        return True
-    elif last_tables_trs == 18 and (bill_gen_month_name != current_month_mmm_yyyy_string) :
-        print(f"SBM Bill not available for current {current_month_mmm_yyyy_string} month.")
-        return False
+    if last_tables_trs == 18:
+        # print(f"No. of 'tr's contained in the last table of bills page: Expected: 18; Received: {last_tables_trs}\n")
+        if (bill_gen_month_name == current_month_mmm_yyyy_string):
+            return (True, bill_gen_month_name)
+        elif (bill_gen_month_name == previous_month_mmm_yyyy_string):
+            return (True, bill_gen_month_name)
+    elif last_tables_trs != 18:
+        print("SBM Bills haven't been generated by CESU or else malformed HTML!")
+        return (False, "")
+
+
+def get_sbm_bill(stringornot="latest", date_string="", format=1):
+    current_month_mmm_yyyy_string = date_tools.current_month_string()
+    previous_month_mmm_yyyy_string = date_tools.previous_month_string()
+    focus_date = "01-"
+    if stringornot == "latest":
+        print("Checking for the latest SBM Bill...")
+        check_for_sbm = check_latest_sbm_bill_present()
+        if check_for_sbm[1] == True:
+            print(f"SBM Bill found for the month: {check_for_sbm[1]}")
+            focus_date += check_for_sbm[1]
+        else:
+            sys.exit("SBM Bills were not found or else malformed HTML.")
+    if stringornot == "datestring":
+        print(f"Fetching SBM Bill data for the month: {date_string}")
+        focus_date += date_string
+    sbm_params = {
+        'DIVCODE': division_code,
+        'CONS_ACC': consumer_id,
+        'CESU_DATE': focus_date
+    }
+    sbm_bill_response = s.get(SBM_BILL_URL, cookies=s.cookies, headers=s.headers, params= sbm_params)
+    output_sbm_bill(sbm_bill_response, format)
+
+
+def output_sbm_bill():
+    pass 
+
+
+def get_sbm_bill(stringornot="current", datestring="", format=""):
+    print("Checking for the latest SBM Bill")
+    check_data = check_latest_sbm_bill_present()
+    focus_date = "01-"
+    if check_data[0] == True:
+        date_confirm = input(f"SBM Bill found for month: {check_data[1]}") #:TODO: Ask confirmation when cesu.py is being run directly.
+        if stringornot == "current":
+            focus_date += current_month_mmm_yyyy_string
+        if stringornot == "previous":
+            focus_date += previous_month_mmm_yyyy_string
+        if stringornot == "datestring":
+            focus_date += datestring
+    payload = {
+            'DIVCODE': division_code,
+            'CONS_ACC': consumer_id,
+            'CESU_DATE': focus_date
+    }
+    sbm_bill_response = s.get(SBM_BILL_URL, cookies=s.cookies, headers=s.headers, params= payload)
+    
 
 
 def get_latest_sbm_bill():
-    sbm_bill_current_month = check_latest_sbm_bill_present()
+    check_data = check_latest_sbm_bill_present()
+    if check_data[0] == True:
+        format_confirm = input(f"SBM Bill found for month: {check_data[0]}.") 
+    elif check_data[0] == False:
+        sys.exit("SBM Bill not found!")
     current_month_mmm_yyyy_string = date_tools.current_month_string()
     if os.path.isdir(SBM_BILLS_DIRPATH) == False:
         os.makedirs(SBM_BILLS_DIRPATH)
     if sbm_bill_current_month == True:
-        sbm_bill_html = s.get("http://" + CESU_CONSUMER_PORTAL_1 + SBM_BILL_URL.replace("DC", division_code).replace("USERNAME", consumer_id).replace("DD-MMM-YYYY", "01"+current_month_mmm_yyyy_string))
-        print(f"Saving to {SBM_BILLS_DIRPATH}/{current_month_mmm_yyyy_string}.html")
-        with open(SBM_BILLS_DIRPATH + f"{current_month_mmm_yyyy_string}.html", "w") as html_file:
-            html_file.write(sbm_bill_html.text)
-    
+        print(f" {SBM_BILL_URL} {division_code} {consumer_id} 01-{current_month_mmm_yyyy_string}")
+        params = {
             
-
+        }
+        print(s.cookies)
+        sbm_bill_response = s.get(SBM_BILL_URL, cookies=s.cookies, headers=s.headers, params=params)
+        # ,  headers=headers
+        print(f"Saving to {SBM_BILLS_DIRPATH}{current_month_mmm_yyyy_string}.html")
+        with open(SBM_BILLS_DIRPATH + f"{current_month_mmm_yyyy_string}.html", "w") as html_file:
+            html_file.write(sbm_bill_response.text)
+    
+                
 get_latest_sbm_bill()
