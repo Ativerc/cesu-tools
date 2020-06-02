@@ -23,8 +23,8 @@ def current_month_string():
     return datetime.strftime(current_month(), "%b-%Y").upper()
 
 def previous_month_string():
-    # when called returns the preious month string
-    return datetime.strftime(previous_month(), "%d-%b-%Y").upper()
+    # when called returns the preious month "MMM-YYYY" string
+    return datetime.strftime(previous_month(), "%b-%Y").upper()
 
 
 def installation_date_parser(installation_date):

@@ -7,7 +7,9 @@ from constants import (LOGIN_PAGE_URL,
                         BILLS_PAGE_URL,
                         DETAILED_BILL_URL,
                         SBM_BILL_URL, 
-                        SBM_BILLS_DIRPATH)
+                        SBM_BILLS_DIRPATH,
+                        SBM_BILL_SUPPORTED_FORMATS)
+import webscreenshot
 
 consumer_account_no = os.environ['ACCOUNT']
 consumer_id = consumer_account_no[4:]
@@ -256,14 +258,14 @@ def check_latest_sbm_bill_present(verbosity=False):
         return (False, "")
 
 
-def get_sbm_bill(stringornot="latest", date_string="", format=1):
+def get_sbm_bill(stringornot="latest", date_string=""):
     current_month_mmm_yyyy_string = date_tools.current_month_string()
     previous_month_mmm_yyyy_string = date_tools.previous_month_string()
     focus_date = "01-"
     if stringornot == "latest":
         print("Checking for the latest SBM Bill...")
         check_for_sbm = check_latest_sbm_bill_present()
-        if check_for_sbm[1] == True:
+        if check_for_sbm[0] == True:
             print(f"SBM Bill found for the month: {check_for_sbm[1]}")
             focus_date += check_for_sbm[1]
         else:
@@ -277,54 +279,16 @@ def get_sbm_bill(stringornot="latest", date_string="", format=1):
         'CESU_DATE': focus_date
     }
     sbm_bill_response = s.get(SBM_BILL_URL, cookies=s.cookies, headers=s.headers, params= sbm_params)
-    output_sbm_bill(sbm_bill_response, format)
+    output_sbm_bill(sbm_bill_response, focus_date)
 
 
-def output_sbm_bill():
-    pass 
+def output_sbm_bill(sbm_bill_response, focus_date):
+    print("Please choose the format that you want the bill in:")
+    for i in range(len(SBM_BILL_SUPPORTED_FORMATS)):
+        print(f"{i+1}. {SBM_BILL_SUPPORTED_FORMATS[i]}")
+    selected_format = input()
+    if selected_format == 1:
+        with open(SBM_BILLS_DIRPATH + f"{focus_date}.html", "w") as sbm_html_file:
+            sbm_html_file.write(sbm_bill_response)
 
-
-def get_sbm_bill(stringornot="current", datestring="", format=""):
-    print("Checking for the latest SBM Bill")
-    check_data = check_latest_sbm_bill_present()
-    focus_date = "01-"
-    if check_data[0] == True:
-        date_confirm = input(f"SBM Bill found for month: {check_data[1]}") #:TODO: Ask confirmation when cesu.py is being run directly.
-        if stringornot == "current":
-            focus_date += current_month_mmm_yyyy_string
-        if stringornot == "previous":
-            focus_date += previous_month_mmm_yyyy_string
-        if stringornot == "datestring":
-            focus_date += datestring
-    payload = {
-            'DIVCODE': division_code,
-            'CONS_ACC': consumer_id,
-            'CESU_DATE': focus_date
-    }
-    sbm_bill_response = s.get(SBM_BILL_URL, cookies=s.cookies, headers=s.headers, params= payload)
-    
-
-
-def get_latest_sbm_bill():
-    check_data = check_latest_sbm_bill_present()
-    if check_data[0] == True:
-        format_confirm = input(f"SBM Bill found for month: {check_data[0]}.") 
-    elif check_data[0] == False:
-        sys.exit("SBM Bill not found!")
-    current_month_mmm_yyyy_string = date_tools.current_month_string()
-    if os.path.isdir(SBM_BILLS_DIRPATH) == False:
-        os.makedirs(SBM_BILLS_DIRPATH)
-    if sbm_bill_current_month == True:
-        print(f" {SBM_BILL_URL} {division_code} {consumer_id} 01-{current_month_mmm_yyyy_string}")
-        params = {
-            
-        }
-        print(s.cookies)
-        sbm_bill_response = s.get(SBM_BILL_URL, cookies=s.cookies, headers=s.headers, params=params)
-        # ,  headers=headers
-        print(f"Saving to {SBM_BILLS_DIRPATH}{current_month_mmm_yyyy_string}.html")
-        with open(SBM_BILLS_DIRPATH + f"{current_month_mmm_yyyy_string}.html", "w") as html_file:
-            html_file.write(sbm_bill_response.text)
-    
-                
-get_latest_sbm_bill()
+get_sbm_bill()

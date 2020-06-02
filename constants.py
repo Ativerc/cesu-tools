@@ -36,3 +36,13 @@ DATA_DIRPATH = os.path.join(CESU_TOOLS_DIRECTORY_PATH, 'data/')
 CONFIG_FILEPATH = os.path.join(CESU_TOOLS_DIRECTORY_PATH, 'config', 'cesu_tools_config.ini')
 
 
+# SBM BILLS
+
+# SBM BILLS OUTPUT SUPPORTED FORMATS
+SBM_BILL_SUPPORTED_FORMATS = [ # Why a list instead of a dictionary? Because I can uncomment out the formats as and when I add support for them.
+    # "Basic SBM Bill Data on Terminal",
+    "HTML: HTML Copy of the SBM Bill",
+    # "JSON: SBM Bill data in JSON format",
+    # "Screenshot: Screenshot of the Bill",
+    # "PDF: SBM Bill in PDF format"
+]
