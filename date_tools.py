@@ -2,9 +2,21 @@ from datetime import *
 from dateutil.relativedelta import *
 from dateutil.parser import ParserError, parse
 from dateutil.rrule import *
-
+import constants
 
 TODAY = datetime.now()
+
+def month_cycler(output_format, input_data="", day=1, month_cycle=0):
+    if output_format in constants.VALID_DATE_FORMATS:
+        if output_format == "MMMYYYY":
+            date_string = datetime.strftime(month_cycler("DTObject", month_cycle=month_cycle), "%b-%Y").upper()
+        return date_string
+    elif output_format == "DTObject":
+        delta_month = relativedelta(day = day, months=month_cycle)
+        month_dto = TODAY + delta_month
+        return month_dto
+
+
 #Current Month
 def current_month_dto():
     """current_month_dto() returns a datetime object 
