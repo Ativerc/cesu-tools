@@ -19,56 +19,6 @@ def month_cycler(output_format, input_data="", day=1, month_cycle=0):
         return month_dto
 
 
-#Current Month
-def current_month_dto():
-    """current_month_dto() returns a datetime object 
-        of the current month with day set to 1.
-
-        For eg:
-        If the current date is 1-DEC-2021, it returns:
-        datetime.datetime(2021, 12, 1, 14, 15, 37, 767140)
-    Returns:
-        <class 'datetime.datetime'>: [description]
-
-    """
-    delta_current_month = relativedelta(day=1) # delta for first day of the month
-    current_month_dt_object = TODAY + delta_current_month
-    return current_month_dt_object
-
-
-def previous_month_dto():
-    """previous_month_dto() returns a datetime object 
-        of the previous month with day set to 1.
-
-        For eg:
-        If the current date is 1-DEC-2021, it returns:
-        datetime.datetime(2021, 11, 1, 14, 15, 37, 767140)
-    Returns:
-        <class 'datetime.datetime'>: [description]
-    """
-    delta_preceeding_month = relativedelta(day=1, months=-1) #delta for the firt day of preceeding month
-    previous_month_dt_object = TODAY + delta_preceeding_month
-    return previous_month_dt_object
-
-def current_month_string():
-    """current_month_string() when called returns 
-    the current month "MMM-YYYY" string
-
-    Returns:
-        [type]: current month "MMM-YYYY" string
-    """
-    return datetime.strftime(month_cycler("DTObject"), "%b-%Y").upper()
-
-def previous_month_string():
-    """previous_month_string() when called returns 
-    the previous month "MMM-YYYY" string
-    Returns:
-        [type]: [description]
-    """
-    # 
-    return datetime.strftime(month_cycler("DTObject", month_cycle=-1), "%b-%Y").upper()
-
-
 def installation_date_parser(installation_date):
     # parse date from given string from soup
     # return date object and string of the installation date
