@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 
-CESU_CONSUMER_PORTAL_1 = "http://117.239.112.120:8070"
+CESU_CONSUMER_PORTAL_1 = "https://portal.tpcentralodisha.com:8079" # https://portal.tpcentralodisha.com:8079/ http://117.239.112.120:8070
 CESU_CONSUMER_PORTAL_2 = "http://203.193.144.25:8080"
 
 def is_portal_up():
@@ -19,7 +19,8 @@ CESU_WORKING_PORTAL = is_portal_up()
 LOGIN_PAGE_URL = CESU_WORKING_PORTAL + "/ConsumerPortal/welcome.jsp"
 LOGIN_URL = CESU_WORKING_PORTAL + "/ConsumerPortal/Record_Check"
 BILLS_PAGE_URL = CESU_WORKING_PORTAL + "/ConsumerPortal/bill_s4.jsp"
-DETAILED_BILL_URL = CESU_WORKING_PORTAL + "/ConsumerPortal/bill_det.jsp"
+# DETAILED_BILL_URL = CESU_WORKING_PORTAL + "/ConsumerPortal/bill_det.jsp"
+DETAILED_BILL_URL = CESU_WORKING_PORTAL + "/ConsumerPortal/bill_det.jsp?DIVCODE=DC&CONS_ACC=USERNAME&CESU_DATE=DD-MM-YYYY" # TODO This should be URLEncoded. Not like this. Me lazyMoron hehe.
 SBM_BILL_URL = CESU_WORKING_PORTAL + "/ConsumerPortal/SBM_Bill_Format.jsp"
 
 # FILEPATHS
@@ -46,3 +47,15 @@ SBM_BILL_SUPPORTED_FORMATS = [ # Why a list instead of a dictionary? Because I c
     # "Screenshot: Screenshot of the Bill",
     # "PDF: SBM Bill in PDF format"
 ]
+
+
+# DATE_FORMAT_CONSTANTS
+# The delimiter for output from any function of date_tools.py is -
+
+VALID_DATE_FORMATS = {
+    "MMMYYYY" : "MMM-YYYY", # DEC-2021
+    "MMYY" : "DD-MM-YY", # 01-12-21
+    "MMYYYY" : "DD-MM-YYYY", # 01-12-2021
+    "DDMMMYYYY" : "DD-MMM-YYYY" # 01-DEC-2021
+}
+
