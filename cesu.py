@@ -221,7 +221,7 @@ def detailed_bill_dict_generator(soup, focus_date): # TODO This will fail or pre
 
 def all_detailed_bill_data_json():
     first_bill_month = first_bill_month_finder()
-    previous_month = date_tools.previous_month_dto()
+    previous_month = date_tools.month_cycler("DTObject", month_cycle=-1)
     date_list = date_tools.mmm_yyyy_month_range(first_bill_month, previous_month)
     print(date_list)
     detailed_bill_soup_list = detailed_bill_requester(date_list)

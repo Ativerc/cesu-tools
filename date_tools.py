@@ -9,7 +9,9 @@ TODAY = datetime.now()
 def month_cycler(output_format, input_data="", day=1, month_cycle=0):
     if output_format in constants.VALID_DATE_FORMATS:
         if output_format == "MMMYYYY":
-            date_string = datetime.strftime(month_cycler("DTObject", month_cycle=month_cycle), "%b-%Y").upper()
+            date_string = datetime.strftime(month_cycler("DTObject", month_cycle=month_cycle, day=day), "%b-%Y").upper()
+        if output_format == "DDMMMYYYY":
+            date_string = datetime.strftime(month_cycler("DTObject", month_cycle=month_cycle, day=day), "%d-%b-%Y").upper()
         return date_string
     elif output_format == "DTObject":
         delta_month = relativedelta(day = day, months=month_cycle)
@@ -55,7 +57,7 @@ def current_month_string():
     Returns:
         [type]: current month "MMM-YYYY" string
     """
-    return datetime.strftime(current_month_dto(), "%b-%Y").upper()
+    return datetime.strftime(month_cycler("DTObject"), "%b-%Y").upper()
 
 def previous_month_string():
     """previous_month_string() when called returns 
@@ -64,7 +66,7 @@ def previous_month_string():
         [type]: [description]
     """
     # 
-    return datetime.strftime(previous_month_dto(), "%b-%Y").upper()
+    return datetime.strftime(month_cycler("DTObject", month_cycle=-1), "%b-%Y").upper()
 
 
 def installation_date_parser(installation_date):
