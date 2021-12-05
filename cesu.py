@@ -10,12 +10,15 @@ from constants import (LOGIN_PAGE_URL,
                         SBM_BILLS_DIRPATH,
                         SBM_BILL_SUPPORTED_FORMATS)
 import webscreenshot
+import path_tools
 
 consumer_account_no = os.environ['ACCOUNT']
 consumer_id = consumer_account_no[4:]
 division_code = consumer_account_no[:3]
 
 def basic_config_creator(account):
+    # I understand what this does. But I don't know why this exists when 
+    # path is not properly ascertained by this function.
     config = configparser.ConfigParser()
     config['BASIC']['CESU Consumer Account No.'] = account
     with open('cesu.ini', 'w') as configfile: #constants.CONFIG_FILEPATH
@@ -83,10 +86,14 @@ def install_date_finder():
     # Returns: dt_object
     focus_date = date_tools.previous_month_string() # TODO If the current month's bill hasn't been generated then the previous month bill won't be available on detailed_bill
     print("focus date in install_date_finder",focus_date)
+    print(DETAILED_BILL_URL.replace("DD-MM-YYYY", focus_date))
     r = s.get(DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date)) 
     soup = bs(r.text, 'html.parser') # TODO This soup needs checking by table data checker; if data is not found then previous to previous month data needs to be fetched.
-    installation_date_string = soup.select('body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(2) > td:nth-child(6) > div:nth-child(1) > b:nth-child(1) > font:nth-child(1)')[0].text.strip()
-    print("installation_date_sting in install_date_finder",installation_date_string)
+    try: 
+        installation_date_string = soup.select('body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(2) > td:nth-child(6) > div:nth-child(1) > b:nth-child(1) > font:nth-child(1)')[0].text.strip()
+    except IndexError as IE:
+        pass
+    print(f"Installation Date [install_date_finder]: {installation_date_string}")
     installation_dt_object = date_tools.dt_string_to_dt_object(installation_date_string, "DD/MM/YYYY")
     return installation_dt_object
 
@@ -123,12 +130,13 @@ def table_data_checker(request_data):
     
 
 def first_bill_month_finder():
-    # The reason this function exists is because the installation date of the meter can preceed the first bill generated, by almost 2-3 months.
+    # The reason this function exists is because the installation date of the meter can preceed the first bill generated,
+    #  by almost 2-3 months.
     # Hitting the endpoint for the 2-3 months in between will return empty detailed bill pages.
     # Arguments: None
     # Function: Returns the dt_string DD-MMM-YYYY for the first bill.
     # Returns: dt_object for the first bill month
-    # This prints all the time. Make it print on verbosity ON or Error
+    # TODO This prints all the time. Make it print on verbosity ON or Error
     month_object = install_date_finder()  #
     print("month_object in first_bill_month_finder()",month_object)
     sentinel = False
@@ -213,7 +221,7 @@ def detailed_bill_dict_generator(soup, focus_date): # TODO This will fail or pre
 
 def all_detailed_bill_data_json():
     first_bill_month = first_bill_month_finder()
-    previous_month = date_tools.previous_month()
+    previous_month = date_tools.previous_month_dto()
     date_list = date_tools.mmm_yyyy_month_range(first_bill_month, previous_month)
     print(date_list)
     detailed_bill_soup_list = detailed_bill_requester(date_list)
@@ -242,13 +250,14 @@ def check_latest_sbm_bill_present(verbosity=False):
     r = s.get(BILLS_PAGE_URL)
     soup = bs(r.text, "html.parser")
     last_tables_trs = len(soup.select("body > table:nth-child(4) > tr"))
-    bill_gen_month_name = soup.select("body > table:nth-child(4) > tr:nth-child(17) > td:nth-child(1) > div > a")[0].text.strip()
-    print(bill_gen_month_name)
-    current_month_mmm_yyyy_string = date_tools.current_month_string()
-    previous_month_mmm_yyyy_string = date_tools.previous_month_string()
-    print(current_month_mmm_yyyy_string)
+    print(last_tables_trs)
     if last_tables_trs == 18:
         # print(f"No. of 'tr's contained in the last table of bills page: Expected: 18; Received: {last_tables_trs}\n")
+        bill_gen_month_name = soup.select("body > table:nth-child(4) > tr:nth-child(17) > td:nth-child(1) > div > a")[0].text.strip()
+        print(bill_gen_month_name)
+        current_month_mmm_yyyy_string = date_tools.month_cycler("MMMYYYY") # REMOVED current_month_string()
+        previous_month_mmm_yyyy_string = date_tools.previous_month_string()
+        print(current_month_mmm_yyyy_string)
         if (bill_gen_month_name == current_month_mmm_yyyy_string):
             return (True, bill_gen_month_name)
         elif (bill_gen_month_name == previous_month_mmm_yyyy_string):
@@ -259,7 +268,7 @@ def check_latest_sbm_bill_present(verbosity=False):
 
 
 def get_sbm_bill(stringornot="latest", date_string=""):
-    current_month_mmm_yyyy_string = date_tools.current_month_string()
+    current_month_mmm_yyyy_string = date_tools.month_cycler("MMMYYYY") # REMOVED current_month_string()
     previous_month_mmm_yyyy_string = date_tools.previous_month_string()
     focus_date = "01-"
     if stringornot == "latest":
@@ -279,7 +288,8 @@ def get_sbm_bill(stringornot="latest", date_string=""):
         'CESU_DATE': focus_date
     }
     sbm_bill_response = s.get(SBM_BILL_URL, cookies=s.cookies, headers=s.headers, params= sbm_params)
-    output_sbm_bill(sbm_bill_response, focus_date)
+    sbm_bill_text = sbm_bill_response.text
+    output_sbm_bill(sbm_bill_text, focus_date)
 
 
 def output_sbm_bill(sbm_bill_response, focus_date):
@@ -287,8 +297,26 @@ def output_sbm_bill(sbm_bill_response, focus_date):
     for i in range(len(SBM_BILL_SUPPORTED_FORMATS)):
         print(f"{i+1}. {SBM_BILL_SUPPORTED_FORMATS[i]}")
     selected_format = input()
-    if selected_format == 1:
+    # Check if SBM_BILLS_DIRPATH exists or not:
+        # If not ask User if, he/she wants to create that path
+            # if user chooses to create path, OK, do that
+            # else, error out gracefully  
+    if path_tools.path_exists_check(SBM_BILLS_DIRPATH):
+        print(f"Output Path: {SBM_BILLS_DIRPATH} exists!")
+    else:
+        print(f"Output Path: {SBM_BILLS_DIRPATH} NOT FOUND!")
+        print("Do you want to create the path and write the file there (Y/N)?:", end = " ")
+        PathCreationChoice = input()
+        if PathCreationChoice == "Y":
+            print(f"Creating Path: {SBM_BILLS_DIRPATH}")
+            path_tools.create_path(SBM_BILLS_DIRPATH)
+        else:
+            print("No Path. No Output. Bye!")
+            sys.exit(1)
+    if selected_format == "1":
         with open(SBM_BILLS_DIRPATH + f"{focus_date}.html", "w") as sbm_html_file:
+            print(f"Writing file as: {SBM_BILLS_DIRPATH}{focus_date}.html")
             sbm_html_file.write(sbm_bill_response)
 
-get_sbm_bill()
+get_sbm_bill("datestring", "NOV-2021")
+# install_date_finder()
