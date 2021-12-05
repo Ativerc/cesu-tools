@@ -84,16 +84,16 @@ def install_date_finder():
     # Arguments: None
     # Function: Returns the installation date of the meter as a dt_object from the bill_det page (Fetches the latest available bill_det page for this.)
     # Returns: dt_object
-    focus_date = date_tools.previous_month_string() # TODO If the current month's bill hasn't been generated then the previous month bill won't be available on detailed_bill
+    focus_date = date_tools.month_cycler("DDMMMYYYY", month_cycle=-1) # TODO If the current month's bill hasn't been generated then the previous month bill won't be available on detailed_bill
     print("focus date in install_date_finder",focus_date)
     print(DETAILED_BILL_URL.replace("DD-MM-YYYY", focus_date))
-    r = s.get(DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date)) 
+    r = s.get(DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
     soup = bs(r.text, 'html.parser') # TODO This soup needs checking by table data checker; if data is not found then previous to previous month data needs to be fetched.
     try: 
         installation_date_string = soup.select('body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(2) > td:nth-child(6) > div:nth-child(1) > b:nth-child(1) > font:nth-child(1)')[0].text.strip()
+        print(f"[install_date_finder]: Installation Date: {installation_date_string}")
     except IndexError as IE:
-        pass
-    print(f"Installation Date [install_date_finder]: {installation_date_string}")
+        print("IndexError")
     installation_dt_object = date_tools.dt_string_to_dt_object(installation_date_string, "DD/MM/YYYY")
     return installation_dt_object
 
@@ -256,7 +256,7 @@ def check_latest_sbm_bill_present(verbosity=False):
         bill_gen_month_name = soup.select("body > table:nth-child(4) > tr:nth-child(17) > td:nth-child(1) > div > a")[0].text.strip()
         print(bill_gen_month_name)
         current_month_mmm_yyyy_string = date_tools.month_cycler("MMMYYYY") # REMOVED current_month_string()
-        previous_month_mmm_yyyy_string = date_tools.previous_month_string()
+        previous_month_mmm_yyyy_string = date_tools.month_cycler("MMMYYYY", month_cycle=-1)
         print(current_month_mmm_yyyy_string)
         if (bill_gen_month_name == current_month_mmm_yyyy_string):
             return (True, bill_gen_month_name)
@@ -269,7 +269,7 @@ def check_latest_sbm_bill_present(verbosity=False):
 
 def get_sbm_bill(stringornot="latest", date_string=""):
     current_month_mmm_yyyy_string = date_tools.month_cycler("MMMYYYY") # REMOVED current_month_string()
-    previous_month_mmm_yyyy_string = date_tools.previous_month_string()
+    previous_month_mmm_yyyy_string = date_tools.month_cycler("MMMYYYY", month_cycle=-1)
     focus_date = "01-"
     if stringornot == "latest":
         print("Checking for the latest SBM Bill...")
@@ -318,5 +318,5 @@ def output_sbm_bill(sbm_bill_response, focus_date):
             print(f"Writing file as: {SBM_BILLS_DIRPATH}{focus_date}.html")
             sbm_html_file.write(sbm_bill_response)
 
-get_sbm_bill("datestring", "NOV-2021")
-# install_date_finder()
+#get_sbm_bill("datestring", "NOV-2021")
+install_date_finder()
