@@ -84,16 +84,24 @@ def install_date_finder():
     # Arguments: None
     # Function: Returns the installation date of the meter as a dt_object from the bill_det page (Fetches the latest available bill_det page for this.)
     # Returns: dt_object
-    focus_date = date_tools.month_cycler("DDMMMYYYY", month_cycle=-1) # TODO If the current month's bill hasn't been generated then the previous month bill won't be available on detailed_bill
-    print("focus date in install_date_finder",focus_date)
-    print(DETAILED_BILL_URL.replace("DD-MM-YYYY", focus_date))
-    r = s.get(DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
-    soup = bs(r.text, 'html.parser') # TODO This soup needs checking by table data checker; if data is not found then previous to previous month data needs to be fetched.
+    month_delta = -1
     try: 
+        focus_date = date_tools.month_cycler("DDMMMYYYY", month_cycle=month_delta)
+        print("focus date in install_date_finder",focus_date)
+        print(DETAILED_BILL_URL.replace("DD-MM-YYYY", focus_date))
+        r = s.get(DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
+        soup = bs(r.text, 'html.parser')
         installation_date_string = soup.select('body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(2) > td:nth-child(6) > div:nth-child(1) > b:nth-child(1) > font:nth-child(1)')[0].text.strip()
         print(f"[install_date_finder]: Installation Date: {installation_date_string}")
     except IndexError as IE:
-        print("IndexError")
+        month_delta -= 1
+        focus_date = date_tools.month_cycler("DDMMMYYYY", month_cycle=month_delta)
+        print(f"IndexError Ocurred. Trying for {focus_date} ")
+        print(DETAILED_BILL_URL.replace("DD-MM-YYYY", focus_date))
+        r = s.get(DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
+        soup = bs(r.text, 'html.parser')
+        installation_date_string = soup.select('body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(2) > td:nth-child(6) > div:nth-child(1) > b:nth-child(1) > font:nth-child(1)')[0].text.strip()
+        print(f"[install_date_finder]: Installation Date: {installation_date_string}")
     installation_dt_object = date_tools.dt_string_to_dt_object(installation_date_string, "DD/MM/YYYY")
     return installation_dt_object
 
