@@ -82,13 +82,20 @@ except requests.RequestException as exception:
 
 def install_date_finder():
     # Arguments: None
-    # Function: Returns the installation date of the meter as a dt_object from the bill_det page (Fetches the latest available bill_det page for this.)
+    # Function: 
     # Returns: dt_object
+    """install_date_finder()
+    Returns the installation date of the meter as a dt_object from the bill_det
+    page (Fetches the latest available bill_det page for this.)
+
+    Returns:
+        datetime object: [description]
+    """
     month_delta = -1
     try: 
         focus_date = date_tools.month_cycler("DDMMMYYYY", month_cycle=month_delta)
         print("focus date in install_date_finder",focus_date)
-        print(DETAILED_BILL_URL.replace("DD-MM-YYYY", focus_date))
+        print(DETAILED_BILL_URL.replace("DD-MM-YYYY", focus_date)) # TODO Privacy Problem
         r = s.get(DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
         soup = bs(r.text, 'html.parser')
         installation_date_string = soup.select('body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(2) > td:nth-child(6) > div:nth-child(1) > b:nth-child(1) > font:nth-child(1)')[0].text.strip()
@@ -97,7 +104,7 @@ def install_date_finder():
         month_delta -= 1
         focus_date = date_tools.month_cycler("DDMMMYYYY", month_cycle=month_delta)
         print(f"IndexError Ocurred. Trying for {focus_date} ")
-        print(DETAILED_BILL_URL.replace("DD-MM-YYYY", focus_date))
+        print(DETAILED_BILL_URL.replace("DD-MM-YYYY", focus_date)) # TODO Privacy Problem
         r = s.get(DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
         soup = bs(r.text, 'html.parser')
         installation_date_string = soup.select('body > div:nth-child(2) > center:nth-child(1) > table:nth-child(3) > tr:nth-child(2) > td:nth-child(6) > div:nth-child(1) > b:nth-child(1) > font:nth-child(1)')[0].text.strip()
@@ -112,7 +119,7 @@ def table_data_checker(request_data):
     # Arguments: request_data [beautifulsoup soup]
     # Function: Checks the first 'td' each table in detailed bill to check if the string within it matches a predefined string.
     # Returns: True when all td strings match the predefined string, else returns False.
-    # :TODO: This is currently set up so that it prints every time. But I will make it so that it outputs only when verbose mode is
+    # TODO This is currently set up so that it prints every time. But I will make it so that it outputs only when verbose mode is
     # activated or an Error occurs.
     soup = bs(request_data.text, 'html.parser')
     data_checker_dict = {
@@ -128,12 +135,15 @@ def table_data_checker(request_data):
         expected_text = data_checker_dict[i][0]
         selected_element = soup.select(data_checker_dict[i][1])
         if (len(selected_element) == 1) and (selected_element[0].text.strip() == expected_text):
-            print("expected_text: " + expected_text + " Len[" + str(len(expected_text)) + "] " + " received_text: " + selected_element[0].text.strip() +  " Len[" + str(len(selected_element[0].text.strip())) + "]" )
+            print("[table_data_checker]: expected_text: " + expected_text + " Len[" + str(len(expected_text)) + "] " + " received_text: " + selected_element[0].text.strip() +  " Len[" + str(len(selected_element[0].text.strip())) + "]" )
             matched_elements.append(selected_element[0].text.strip())
         else: 
-            print(f"Expected: {expected_text}. Not found!")
+            print(f"[table_data_checker]: Expected: {expected_text}. Not found!")
             return False
-    print(matched_elements)
+    print("[table_data_checker]: Matched Elements: ", end="")
+    for i in matched_elements:
+        print(i, end=" ")
+    print()
     return True
     
 
@@ -141,9 +151,15 @@ def first_bill_month_finder():
     # The reason this function exists is because the installation date of the meter can preceed the first bill generated,
     #  by almost 2-3 months.
     # Hitting the endpoint for the 2-3 months in between will return empty detailed bill pages.
-    # Arguments: None
-    # Function: Returns the dt_string DD-MMM-YYYY for the first bill.
-    # Returns: dt_object for the first bill month
+    """first_bill_month_finder()
+    Prints the months between installation date of the meter and the first
+    bill month.
+    On finding the first bill, prints the first bill month.
+
+    Finally, returns the DTObject for the first bill month.
+    Returns:
+        DTObject: DTObject for the first bill month.
+    """ 
     # TODO This prints all the time. Make it print on verbosity ON or Error
     month_object = install_date_finder()  #
     print("month_object in first_bill_month_finder()",month_object)
@@ -151,29 +167,34 @@ def first_bill_month_finder():
     while (sentinel == False):
         focus_date = date_tools.dt_object_to_mmm_yyyy(month_object)# focus date = 01-MMM-YYYY(month_object)
         url = DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date) # url = .com/focus-date/userid/bill-det
-        print("Table Data Checker URL: ",url)
+        # print("Table Data Checker URL: ",url) #TODO Privacy Problem 
         request_data = s.get(url)
         sentinel = table_data_checker(request_data)
         if sentinel == True:
-            print("sentinel value in while loop if con sentinel == True: ", sentinel)
             break
         elif sentinel == False:
-            print("sentinel value in while loop if con sentinel ==False:", sentinel)
+            print(f"[first_bill_month_finder]: {focus_date} isn't the first bill month.")
             month_object = date_tools.next_month(month_object)
-    print(f"month_object: {month_object} focus_date: {focus_date}")
+    print(f"[first_bill_month_finder()]: month_object: {month_object} focus_date: {focus_date}")
     return month_object
 
 
 # TODO send first_bill_finder() and previousmonth() to a function to create a generator 
 
 def detailed_bill_requester(date_list):
-    # Arguments: date_list [list of MMM-YYYY date_strings]
-    # Function: Given the date_list this will request detailed bill for each month in that list and store the corresponding soups in soup_list
-    # and return the soup_list
-    # Returns:  soup_list [List of bs4 soups of detailed_bill for each MMM-YYYY in date_list]
+    """detailed_bill_requester(date_list)
+    Given the date_list this will request detailed bill for each month in that list 
+    and store the corresponding soups in soup_list and return the soup_list
+
+    Args:
+        date_list (list): list of 01-MMM-YYYY strings
+
+    Returns:
+        list: list of bs4 soups
+    """
     soup_list = []
     for focus_date in date_list:
-        time.sleep(5) 
+        time.sleep(10) 
         r = s.get(DETAILED_BILL_URL.replace("USERNAME", consumer_id).replace("DC", division_code).replace("DD-MM-YYYY", focus_date))
         soup = bs(r.text, 'html.parser')
         soup_list.append(soup)
@@ -229,7 +250,7 @@ def detailed_bill_dict_generator(soup, focus_date): # TODO This will fail or pre
 
 def all_detailed_bill_data_json():
     first_bill_month = first_bill_month_finder()
-    previous_month = date_tools.month_cycler("DTObject", month_cycle=-1)
+    previous_month = date_tools.month_cycler("DTObject", month_cycle=-1) # TODO This will fail because the previous month doesn't have detailed_bill all the time. 
     date_list = date_tools.mmm_yyyy_month_range(first_bill_month, previous_month)
     print(date_list)
     detailed_bill_soup_list = detailed_bill_requester(date_list)
@@ -327,4 +348,6 @@ def output_sbm_bill(sbm_bill_response, focus_date):
             sbm_html_file.write(sbm_bill_response)
 
 #get_sbm_bill("datestring", "NOV-2021")
-install_date_finder()
+# install_date_finder()
+# first_bill_month_finder()
+all_detailed_bill_data_json()
