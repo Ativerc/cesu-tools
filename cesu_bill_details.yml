@@ -1,0 +1,630 @@
+scraping_resource_id: CESU Bill Details Page
+scraping_data:
+  Consumer_Information:
+    tag:
+      visible_tag: "Consumer Information"
+      stored_tag_value: "Consumer Information "
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(1) > td > div > span > font"
+      tag_value_type: string
+  Circle:
+    tag: 
+      visible_tag: "Circle"
+      stored_tag_value: "Circle" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(2) > td:nth-child(1) > div"
+      tag_value_type:  string
+    value:
+      value_type: string
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(2) > td:nth-child(2) > div > font"
+    property:
+      private: False
+      core-data: True
+  Division:
+    tag: 
+      visible_tag: "Division"
+      stored_tag_value: "Division" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(2) > td:nth-child(3) > div"
+      tag_value_type: string 
+    value:
+      value_type: string 
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(2) > td:nth-child(4) > div > font"
+    property:
+      private: False
+      core-data: True
+  Sub_Division:
+    tag: 
+      visible_tag: "Sub-Division"
+      stored_tag_value: "Sub-Division" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(2) > td:nth-child(5) > div"
+      tag_value_type: string
+    value:
+      value_type: string
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(2) > td.style15 > div > font"
+    property:
+      private: False
+      core-data: True
+  Section:
+    tag: 
+      visible_tag: "Section"
+      stored_tag_value: "Section" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(3) > td:nth-child(1) > div"
+      tag_value_type:  string
+    value:
+      value_type: string
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(3) > td:nth-child(2) > div > font"
+    property:
+      private: False
+      core-data: True
+  Consumer Number:
+    tag: 
+      visible_tag: "Consumer Number"
+      stored_tag_value: "Consumer Number " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(3) > td:nth-child(3) > div"
+      tag_value_type:  int
+    value:
+      value_type: int
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(3) > td.style12 > div > font"
+    property:
+      private: True
+      core-data: True
+  Tariff Category:
+    tag: 
+      visible_tag: "Tariff Category"
+      stored_tag_value: "Tariff Category" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(3) > td:nth-child(5) > div"
+      tag_value_type:  string
+    value:
+      value_type: string
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(3) > td.style15 > div > font"
+    property:
+      private: False
+      core-data: True
+  Name:
+    tag: 
+      visible_tag: "Name"
+      stored_tag_value: "Name" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(4) > td:nth-child(1) > div"
+      tag_value_type: string 
+    value:
+      value_type: 
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(4) > td:nth-child(2) > div > font"
+    property:
+      private: False
+      core-data: True
+  Connected Load:
+    tag: 
+      visible_tag: "Connected Load"
+      stored_tag_value: "Connected Load " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(4) > td:nth-child(3) > div"
+      tag_value_type: string
+    value:
+      value_type: string
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(4) > td.style15 > div > font"
+    property:
+      private: False
+      core-data: True
+  Address:
+    tag: 
+      visible_tag: "Address"
+      stored_tag_value: "Address" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(5) > td:nth-child(1) > div"
+      tag_value_type:  string
+    value:
+      value_type: string
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(5) > td:nth-child(2) > div:nth-child(1) > b > font"
+    property:
+      private: False
+      core-data: True
+  Present Power Supply Status:
+    tag: 
+      visible_tag: "Present Power Supply Sts"
+      stored_tag_value: "Present Power Supply Sts" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(6) > td:nth-child(1) > div > span"
+      tag_value_type:  string
+    value:
+      value_type: string
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(6) > td:nth-child(2) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Supply Phase:
+    tag: 
+      visible_tag: "Supply Phase"
+      stored_tag_value: " Supply Phase " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(6) > td:nth-child(3) > div > span"
+      tag_value_type: string
+    value:
+      value_type: int
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(6) > td:nth-child(4) > div > span > b > font"
+    property:
+      private: False
+      core-data: True
+  Security Deposit:
+    tag: 
+      visible_tag: "Security Deposit"
+      stored_tag_value: "Security Deposit" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(6) > td:nth-child(5) > div > span"
+      tag_value_type: string
+    value:
+      value_type: int
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(1) > tbody > tr:nth-child(6) > td:nth-child(6) > div > span > b > font"
+    property:
+      private: False
+      core-data: True
+  Meter Information: # Table
+    tag:
+      visible_tag: "Meter Information"
+      stored_tag_value: "Meter Information "
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(1) > td > div > span > font"
+      tag_value_type: string
+  Meter Serial No:
+    tag:
+      visible_tag: "Meter Sl No"
+      stored_tag_value: "Meter Sl No " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(2) > td:nth-child(1) > div"
+      tag_value_type: string 
+    value:
+      value_type: string
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(2) > td:nth-child(2) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Meter Owner:
+    tag:
+      visible_tag: "Meter Owner"
+      stored_tag_value: "Meter Owner " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(2) > td:nth-child(3) > div"
+      tag_value_type:  
+    value:
+      value_type: 
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(2) > td:nth-child(4) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Installation Date:
+    tag:
+      visible_tag: "Installation Date"
+      stored_tag_value: "Installation Date " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(2) > td:nth-child(5) > div"
+      tag_value_type: string 
+    value:
+      value_type: datestring
+      visible_value: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(2) > td:nth-child(6) > div > b > font"
+      selector: ""
+    property:
+      private: False
+      core-data: True
+  Multiplication Factor:
+    tag:
+      visible_tag: "Multiplication Factor"
+      stored_tag_value: "Multiplication Factor " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(3) > td:nth-child(1) > div"
+      tag_value_type: string
+    value:
+      value_type: 
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(3) > td:nth-child(2) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Bill Basis:
+    tag:
+      visible_tag: "Bill Basis"
+      stored_tag_value: "Bill Basis" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(3) > td:nth-child(3) > div"
+      tag_value_type:  string
+    value:
+      value_type: string
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(3) > td:nth-child(4) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Present Meter Status:
+    tag:
+      visible_tag: "Present Mtr Staus"
+      stored_tag_value: "Present Mtr Staus" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(3) > td:nth-child(5) > div"
+      tag_value_type:  string
+    value:
+      value_type: string
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(3) > td:nth-child(6) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Previous Meter Reading:
+    tag:
+      visible_tag: "Previous Mtr Reading"
+      stored_tag_value: "Previous Mtr Reading" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(4) > td:nth-child(1) > div"
+      tag_value_type: string
+    value:
+      value_type: int
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(4) > td:nth-child(2) > div:nth-child(1) > b > font"
+    property:
+      private: False
+      core-data: True
+  Present Meter Reading:
+    tag:
+      visible_tag: "Present Meter Reading"
+      stored_tag_value: "Present Meter Reading" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(4) > td:nth-child(3) > div"
+      tag_value_type:  string
+    value:
+      value_type: int
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(4) > td:nth-child(4) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Unit Billed:
+    tag:
+      visible_tag: "Unit Billed"
+      stored_tag_value: "Unit Billed " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(4) > td:nth-child(5) > div"
+      tag_value_type:  string
+    value:
+      value_type: int
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(3) > tbody > tr:nth-child(4) > td:nth-child(6) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Billing Information: # Table
+    tag:
+      visible_tag: "Billing Information"
+      stored_tag_value: "Billing Information " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(1) > td > div > span > font"
+      tag_value_type: string
+  Bill Month:
+    tag:
+      visible_tag: "Bill Month"
+      stored_tag_value: "Bill Month" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(1) > div:nth-child(1)"
+      tag_value_type: string 
+    value:
+      value_type: datestring
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(3) > td:nth-child(1) > span > b > font"
+    property:
+      private: False
+      core-data: True
+  Bill Date:
+    tag:
+      visible_tag: "Bill Date"
+      stored_tag_value: "Bill Date " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(2) > div:nth-child(1)"
+      tag_value_type: string
+    value:
+      value_type: datestring
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(3) > td:nth-child(2) > span > b > font"
+    property:
+      private: False
+      core-data: True
+  Rebate Date:
+    tag:
+      visible_tag: "Rebate Date"
+      stored_tag_value: "Rebate Date " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(3) > div:nth-child(1)"
+      tag_value_type: string
+    value:
+      value_type: datestring
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(3) > td:nth-child(3) > span > b > font"
+    property:
+      private: False
+      core-data: True
+  Current EC:
+    tag:
+      visible_tag: "Current EC"
+      stored_tag_value: "Current EC" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(4) > td:nth-child(1) > div"
+      tag_value_type: string
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(5) > td:nth-child(1) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Electricity Duty:
+    tag:
+      visible_tag: "Electricity Duty"
+      stored_tag_value: "Electricity Duty" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(4) > td:nth-child(2) > div"
+      tag_value_type:  string
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(5) > td:nth-child(2) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Meter Rent:
+    tag:
+      visible_tag: "Meter Rent"
+      stored_tag_value: "Meter Rent " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(4) > td:nth-child(3) > div"
+      tag_value_type: string
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(5) > td:nth-child(3) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Minimum Fix Charge:
+    tag:
+      visible_tag: "Minimum Fix Charge"
+      stored_tag_value: "Minimum Fix Charge" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(4) > td:nth-child(4) > div"
+      tag_value_type: string
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(5) > td:nth-child(4) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  DPS:
+    tag:
+      visible_tag: "DPS"
+      stored_tag_value: "DPS" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(4) > td:nth-child(5) > div"
+      tag_value_type: string
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(5) > td:nth-child(5) > div > span > b > font"
+    property:
+      private: False
+      core-data: True
+  Current Total:
+    tag:
+      visible_tag: "Current Total"
+      stored_tag_value: "Current Total" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(4) > td:nth-child(6) > div"
+      tag_value_type:  string
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(5) > td:nth-child(6) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Total Bill Amount:
+    tag:
+      visible_tag: "Total Bill Amount"
+      stored_tag_value: "Total Bill Amount " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(6) > td:nth-child(2)"
+      tag_value_type: string
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(7) > td:nth-child(2) > div:nth-child(1) > b > font"
+    property:
+      private: False
+      core-data: True
+  Rebate Amount:
+    tag:
+      visible_tag: "Rebate Amount"
+      stored_tag_value: "Rebate Amount " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(6) > td:nth-child(3)"
+      tag_value_type: string
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(5) > tbody > tr:nth-child(7) > td:nth-child(3) > div:nth-child(1) > b > font"
+    property:
+      private: False
+      core-data: True
+  Adjustment Information: #Table
+    tag:
+      visible_tag: "Adjustment Information"
+      stored_tag_value: "Adjustment Information " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(7) > tbody > tr:nth-child(1) > td > div > span > font"
+      tag_value_type: string
+  Date of Adjustment:
+    tag:
+      visible_tag: "Date of Adjustment"
+      stored_tag_value: "Date of Adjustment " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(7) > tbody > tr:nth-child(2) > td:nth-child(1) > div"
+      tag_value_type: string 
+    value:
+      value_type: datestring
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(7) > tbody > tr:nth-child(3) > td:nth-child(1) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Adjustment Unit:
+    tag:
+      visible_tag: "Adjustment Unit"
+      stored_tag_value: "Adjustment Unit " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(7) > tbody > tr:nth-child(2) > td:nth-child(2) > div"
+      tag_value_type: string
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(7) > tbody > tr:nth-child(3) > td:nth-child(2) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Adjustment EC Amount:
+    tag:
+      visible_tag: "Adjustment EC Amount"
+      stored_tag_value: "Adjustment EC Amount" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(7) > tbody > tr:nth-child(2) > td:nth-child(3) > div"
+      tag_value_type: string
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(7) > tbody > tr:nth-child(3) > td:nth-child(3) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Other Adjustment:
+    tag:
+      visible_tag: "Other Adjustment"
+      stored_tag_value: "Other Adjustment " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(7) > tbody > tr:nth-child(2) > td:nth-child(4) > div"
+      tag_value_type: string
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(7) > tbody > tr:nth-child(3) > td:nth-child(4) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Total Adjustment:
+    tag:
+      visible_tag: "Total Adjustment"
+      stored_tag_value: "Total Adjustment " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(7) > tbody > tr:nth-child(2) > td:nth-child(5) > div"
+      tag_value_type: string
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(7) > tbody > tr:nth-child(3) > td:nth-child(5) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Adjustments-1:
+    tag:
+      visible_tag: "Adjustments-1"
+      stored_tag_value: "Adjustments-1" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(7) > tbody > tr:nth-child(2) > td:nth-child(6) > div"
+      tag_value_type: string
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(7) > tbody > tr:nth-child(3) > td:nth-child(6) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Payment & Arrear Information: #Table
+    tag:
+      visible_tag: "Payment & Arrear Information"
+      stored_tag_value: "Payment & Arrear  Information " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(9) > tbody > tr:nth-child(1) > td > div > span > font"
+      tag_value_type: string
+  Date of Payment:
+    tag:
+      visible_tag: "Date of Payment"
+      stored_tag_value: "Date of Payment " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(9) > tbody > tr:nth-child(2) > td:nth-child(1) > div"
+      tag_value_type: string
+    value:
+      value_type: datestring
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(9) > tbody > tr:nth-child(2) > td:nth-child(2) > div:nth-child(1) > b > font"
+    property:
+      private: False
+      core-data: True
+  Money Receipt Number:
+    tag:
+      visible_tag: "Money Receipt Number"
+      stored_tag_value: "Money Receipt Number" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(9) > tbody > tr:nth-child(2) > td:nth-child(3) > div"
+      tag_value_type: string
+    value:
+      value_type: string
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(9) > tbody > tr:nth-child(2) > td:nth-child(4) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  MR Book Number:
+    tag:
+      visible_tag: "MR Book Number"
+      stored_tag_value: "MR Book Number " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(9) > tbody > tr:nth-child(2) > td:nth-child(5) > div"
+      tag_value_type: string
+    value:
+      value_type: string
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(9) > tbody > tr:nth-child(2) > td:nth-child(6) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Amount Paid:
+    tag:
+      visible_tag: "Amount Paid"
+      stored_tag_value: "Amount Paid " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(9) > tbody > tr:nth-child(3) > td:nth-child(1) > div"
+      tag_value_type: string 
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(9) > tbody > tr:nth-child(3) > td:nth-child(2) > div:nth-child(1) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Excess Amount:
+    tag:
+      visible_tag: "Excess Amount"
+      stored_tag_value: "Excess Amount" 
+      selector: "body > div:nth-child(2) > center > table:nth-child(9) > tbody > tr:nth-child(3) > td:nth-child(3) > div"
+      tag_value_type: string 
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(9) > tbody > tr:nth-child(3) > td:nth-child(4) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Net Arrear:
+    tag:
+      visible_tag: "Net Arrear"
+      stored_tag_value: "Net Arrear " 
+      selector: "body > div:nth-child(2) > center > table:nth-child(9) > tbody > tr:nth-child(3) > td:nth-child(5) > div"
+      tag_value_type: string
+    value:
+      value_type: float
+      visible_value: ""
+      selector: "body > div:nth-child(2) > center > table:nth-child(9) > tbody > tr:nth-child(3) > td:nth-child(6) > div > b > font"
+    property:
+      private: False
+      core-data: True
+  Remarks: #Table
+
+
+
+
+#scraping_data:
+#  TableTagName:
+#    table_tag:
+#      visible_tag: ""
+#      stored_tag_value: ""
+#      selector: ""
+#      tag_value_type: 
+#     sub_tags:
+#       SubTagName:
+#           tag: 
+#             visible_tag: ""
+#             stored_tag_value: "" 
+#             selector: ""
+#             tag_value_type:  
+#           value:
+#             value_type: 
+#             visible_value: ""
+#             selector: ""
+#           property:
+#             private: False
+#             core-data: True
