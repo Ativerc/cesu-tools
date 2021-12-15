@@ -23,7 +23,7 @@ def installation_date_parser(installation_date):
     # parse date from given string from soup
     # return date object and string of the installation date
     pass
- 
+
 
 def date_validator(date_string, dt_string_format="DD-MM-YYYY"):
     """date_validator(date_string, dt_string_format)

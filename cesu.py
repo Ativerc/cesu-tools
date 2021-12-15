@@ -208,9 +208,9 @@ def detailed_bill_dict_generator(soup, focus_date): # TODO This will fail or pre
     # Table 1 Consumer Information []
     # Table 2 Meter Information []
     # Table 3 Billing Information []
-    # Table 4 Adjustment Information []
+    # Table 4 Adjustment Information [] (Not Scraped) # TODO
     # Table 5 Payment and Arrear Information 
-    # Table 6 Remarks (Not Scraped)
+    # Table 6 Remarks (Not Scraped) # TODO
 
     # Table 1, 2, 5 scraping format is equal
     detailed_bill_dict[focus_date] = {}
@@ -264,6 +264,11 @@ def all_detailed_bill_data_json():
 
 
 def check_latest_sbm_bill_present(verbosity=False):
+    # TODO Replace this by one which checks sbm_bill_present_or_not for any MMM-YYYY
+    # TODO This check_latest_sbm_bill_present() checks for the latest bill present or not 
+    # TODO by counting the BILL_PAGE_URL for the number of rows. 
+    # TODO Screw this logic. Make a sbm_bill.yml and form the sbm_bill_present around checking according
+    # TODO to that .yml file.
     #check bills page if latestbill element exists
         # count the number of tr in the last table of the page.
             # if the count == 18 then 15,16,17 tr are important 
@@ -310,7 +315,7 @@ def get_sbm_bill(stringornot="latest", date_string=""):
             sys.exit("SBM Bills were not found or else malformed HTML.")
     if stringornot == "datestring":
         print(f"Fetching SBM Bill data for the month: {date_string}")
-        focus_date += date_string
+        focus_date += date_string # TODO Add a check if a particular bill is present or not.
     sbm_params = {
         'DIVCODE': division_code,
         'CONS_ACC': consumer_id,
@@ -322,6 +327,12 @@ def get_sbm_bill(stringornot="latest", date_string=""):
 
 
 def output_sbm_bill(sbm_bill_response, focus_date):
+    """[summary]
+
+    Args:
+        sbm_bill_response ([type]): [description]
+        focus_date ([type]): [description]
+    """
     print("Please choose the format that you want the bill in:")
     for i in range(len(SBM_BILL_SUPPORTED_FORMATS)):
         print(f"{i+1}. {SBM_BILL_SUPPORTED_FORMATS[i]}")
@@ -347,7 +358,7 @@ def output_sbm_bill(sbm_bill_response, focus_date):
             print(f"Writing file as: {SBM_BILLS_DIRPATH}{focus_date}.html")
             sbm_html_file.write(sbm_bill_response)
 
-#get_sbm_bill("datestring", "NOV-2021")
+get_sbm_bill("latest", "")
 # install_date_finder()
 # first_bill_month_finder()
-all_detailed_bill_data_json()
+# all_detailed_bill_data_json()
